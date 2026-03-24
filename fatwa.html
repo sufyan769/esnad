@@ -93,7 +93,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
+    <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
   </footer>
 
   <div class="fab-container reader-fabs print:hidden">
@@ -337,7 +337,8 @@
 
     function buildMeta(data) {
       const parts = [];
-      if (data.id) parts.push(`<span class="reader-meta-pill">فتوى رقم ${data.id}</span>`);
+      const cleanId = String(data.id || '').replace('fatwa/', '');
+      if (data.id) parts.push(`<span class="reader-meta-pill">رقم الفتوى: ${cleanId}</span>`);
       if (data.source) parts.push(`<span class="reader-meta-pill" style="background:rgba(16,185,129,0.12);color:#047857;">${data.source}</span>`);
       return parts.join('');
     }
