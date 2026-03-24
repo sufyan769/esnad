@@ -507,19 +507,19 @@
           if (pageNum) metaParts.push(`<strong style="color: #8d6e63;">رقم/صفحة:</strong> <span style="color: #8d6e63;">${pageNum}</span>`);
 
           snippet = metaParts.length > 0 ? metaParts.join(' • ') : '';
-          link = `details_hadith.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
+          link = `/hadith/${hit.objectID}?q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-info">حديث</span>`;
         } else if (type === 'scholars') {
           title = getHighlighted(hit, 'name', hit.name || "بطاقة تراجم");
           snippet = getHighlighted(hit, 'trj', hit.trj ? hit.trj.substring(0, 200) + "..." : "");
           const docId = hit.objectID || hit.id;
-          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
+          link = `/scholar/${docId}?q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-info">تراجم</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         } else if (type === 'history') {
           title = getHighlighted(hit, 'name', hit.name || "بدون عنوان");
           const content = hit.full_intro || hit.text || "";
           snippet = getHighlighted(hit, 'full_intro', content.substring(0, 200) + "...");
-          link = `history.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
+          link = `/history/${hit.objectID}?q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-warning">سير الأعلام</span>`;
         } else if (type === 'fatawa') {
           const fatwaId = hit.objectID || hit.id || '';
@@ -533,12 +533,12 @@
           const content = hit.trj || hit.summary || "";
           snippet = highlightText(content.substring(0, 220) + "...", term);
           const docId = hit.id || hit.objectID;
-          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
+          link = `/scholar/${docId}?q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-success">قاعدة Firebase</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         } else if (type === 'jarh') {
           title = highlightText(hit['الاسم'] || "راوي بدون اسم", term);
           snippet = `رتبة ابن حجر: ${hit['الرتبة عند ابن حجر'] || '-'} | رتبة الذهبي: ${hit['الرتبة عند الذهبي'] || '-'}`;
-          link = `details_jarh.html?id=${hit.id || hit.objectID}&q=${encodeURIComponent(term)}`;
+          link = `/jarh/${hit.id || hit.objectID}?q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-warning">الجرح والتعديل</span>`;
         }
 
@@ -746,7 +746,7 @@
         const excerpt = stripPlaceholderDomain(truncateText(hit.trj || '', 150));
         const meta = hit.death ? `توفي سنة ${hit.death}` : '';
         const item = document.createElement('a');
-        item.href = `details_scholars.html?id=${docId}`;
+        item.href = `/scholar/${docId}`;
         item.className = 'curated-item';
         item.innerHTML = `
           <p class="curated-item-title">${name}</p>

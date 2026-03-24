@@ -248,7 +248,7 @@
           <div class="flex justify-between items-start">
             <div>
               <h3 class="text-xl font-bold font-serif text-blue-700 mb-2">
-                <a href="details_jarh.html?id=${id}" class="hover:text-blue-800 transition-colors">${name}</a>
+                <a href="/jarh/${id}" class="hover:text-blue-800 transition-colors">${name}</a>
               </h3>
               <div class="flex flex-wrap gap-2 text-sm text-gray-600 mb-3">
                 ${rankIbnHajar ? `<span class="meta-tag">ابن حجر: ${rankIbnHajar}</span>` : ''}
@@ -256,7 +256,7 @@
                 ${deathDate ? `<span class="meta-tag">توفي: ${deathDate}</span>` : ''}
               </div>
             </div>
-            <a href="details_jarh.html?id=${id}" class="text-gray-400 hover:text-blue-600">
+            <a href="/jarh/${id}" class="text-gray-400 hover:text-blue-600">
               <i data-lucide="chevron-left" class="w-6 h-6"></i>
             </a>
           </div>
