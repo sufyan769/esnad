@@ -291,15 +291,15 @@
     let currentHits = [];
 
     const PLACEHOLDER_DOMAIN = 'https://fatawa-seo-eanp.vercel.app';
-    const FATWA_PAGE = 'fatwa.html';
+    const FATWA_PAGE = '/fatwa/';
 
     const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
     const hasHTMLMarkup = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
 
     const buildFatwaDetailUrl = (id, query = '') => {
-      let url = id ? `${FATWA_PAGE}?id=${encodeURIComponent(id)}` : '#';
+      let url = id ? `${FATWA_PAGE}${encodeURIComponent(id)}` : '#';
       if (query && id) {
-        url += `&q=${encodeURIComponent(query)}`;
+        url += `?q=${encodeURIComponent(query)}`;
       }
       return url;
     };
