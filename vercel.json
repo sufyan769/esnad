@@ -2,24 +2,24 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/fatwa/:id",
-      "destination": "/fatwa.html?id=:id"
+      "source": "/fatwa/(.*)",
+      "destination": "/fatwa.html?id=$1"
     },
     {
-      "source": "/hadith/:id",
-      "destination": "/details_hadith.html?id=:id"
+      "source": "/hadith/(.*)",
+      "destination": "/details_hadith.html?id=$1"
     },
     {
-      "source": "/scholar/:id",
-      "destination": "/details_scholars.html?id=:id"
+      "source": "/scholar/(.*)",
+      "destination": "/details_scholars.html?id=$1"
     },
     {
-      "source": "/history/:id",
-      "destination": "/history.html?id=:id"
+      "source": "/history/(.*)",
+      "destination": "/history.html?id=$1"
     },
     {
-      "source": "/jarh/:id",
-      "destination": "/details_jarh.html?id=:id"
+      "source": "/jarh/(.*)",
+      "destination": "/details_jarh.html?id=$1"
     }
   ]
 }
