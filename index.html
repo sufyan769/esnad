@@ -208,7 +208,7 @@
       }
     };
 
-    const PLACEHOLDER_DOMAIN = 'https://fatawa-seo.vercel.app';
+    const PLACEHOLDER_DOMAIN = 'https://fatawa-seo-eanp.vercel.app';
     const FATWA_PAGE = 'fatwa.html';
 
     const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
@@ -668,7 +668,7 @@
       if (!url) return '';
       try {
         const parsed = new URL(url, window.location.origin);
-        if (parsed.hostname.includes('fatawa-seo.vercel.app')) {
+        if (parsed.hostname.includes('fatawa-seo-eanp.vercel.app')) {
           return parsed.pathname + parsed.search + parsed.hash;
         }
         return url;
