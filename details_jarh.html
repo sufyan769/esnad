@@ -247,7 +247,7 @@
         const params = new URLSearchParams(window.location.search);
         let docId = params.get("id");
         if (!docId) {
-            const match = window.location.pathname.match(/\/jarh\/([^\/]+)/i);
+            const match = window.location.pathname.match(/\/jarh_([^\/]+)/i);
             if (match && match[1]) docId = decodeURIComponent(match[1]);
         }
 

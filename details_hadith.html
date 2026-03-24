@@ -167,7 +167,7 @@
         const params = new URLSearchParams(window.location.search);
         let docId = params.get("id");
         if (!docId) {
-            const match = window.location.pathname.match(/\/hadith\/([^\/]+)/i);
+            const match = window.location.pathname.match(/\/hadith_([^\/]+)/i);
             if (match && match[1]) docId = decodeURIComponent(match[1]);
         }
         const searchTerm = params.get("q");
@@ -642,7 +642,7 @@
                         ${takhrij ? `<span>التخريج: ${takhrij}</span>` : ''}
                     </div>
                     <div class="similar-actions">
-                        <a class="btn btn-primary btn-xs" href="/hadith/${linkId}">عرض الحديث</a>
+                        <a class="btn btn-primary btn-xs" href="/hadith_${linkId}">عرض الحديث</a>
                         ${docItem.sharh ? `<button class="btn btn-secondary btn-xs" data-toggle="${sharhId}" data-label="الشرح">عرض الشرح</button>` : ''}
                         ${docItem.osoul ? `<button class="btn btn-secondary btn-xs" data-toggle="${osoulId}" data-label="الأصول">عرض الأصول</button>` : ''}
                     </div>

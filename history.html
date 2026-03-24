@@ -734,7 +734,7 @@
                 const params = new URLSearchParams(window.location.search);
                 let id = params.get('id');
                 if (!id) {
-                    const match = window.location.pathname.match(/\/history\/([^\/]+)/i);
+                    const match = window.location.pathname.match(/\/history_([^\/]+)/i);
                     if (match && match[1]) id = decodeURIComponent(match[1]);
                 }
                 if (id) {

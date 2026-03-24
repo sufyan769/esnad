@@ -127,7 +127,7 @@
     const db = getFirestore(app);
 
     const PLACEHOLDER_DOMAIN = 'https://fatawa-seo-eanp.vercel.app';
-    const FATWA_PAGE = '/fatwa/';
+    const FATWA_PAGE = '/fatwa_';
 
     const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
     const hasHTMLMarkup = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
@@ -186,7 +186,7 @@
     const params = new URLSearchParams(window.location.search);
     let requestedId = params.get('id');
     if (!requestedId) {
-      const match = window.location.pathname.match(/\/fatwa\/([^\/]+)/i);
+      const match = window.location.pathname.match(/\/fatwa_([^\/]+)/i);
       if (match && match[1]) requestedId = decodeURIComponent(match[1]);
     }
     const searchTerm = params.get('q') || '';

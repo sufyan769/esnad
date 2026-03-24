@@ -114,7 +114,7 @@
         const params = new URLSearchParams(window.location.search);
         let docId = params.get("id");
         if (!docId) {
-            const match = window.location.pathname.match(/\/scholar\/([^\/]+)/i);
+            const match = window.location.pathname.match(/\/scholar_([^\/]+)/i);
             if (match && match[1]) docId = decodeURIComponent(match[1]);
         }
         const searchTerm = params.get("q");
