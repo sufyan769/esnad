@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الجرح والتعديل - موسوعة البيان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700&family=Scheherazade+New:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Amiri', serif;
+        }
+
+        .search-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .result-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .result-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+
+        .meta-tag {
+            background: #f3f4f6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i data-lucide="library"></i>
+                <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
+                        class="brand-accent">البيان</span></span>
+            </a>
+                  <div class="nav-links">
+        <a href="index.html?tab=hadith" class="nav-link">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+        <a href="index.html?tab=scholars" class="nav-link">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="index.html?tab=history" class="nav-link">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          سير الأعلام
+        </a>
+        <a href="index.html?tab=jarh" class="nav-link active">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          الجرح والتعديل
+        </a>
+        <a href="index.html?tab=fatawa" class="nav-link">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="index.html?tab=firebase" class="nav-link">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">موسوعة الجرح والتعديل</h1>
+            <p class="text-slate-600">بحث متخصص في رواة الحديث وأقوال النقاد فيهم</p>
+        </div>
+
+        <div class="search-container">
+            <form id="searchForm" class="flex gap-4">
+                <div class="flex-1 relative">
+                    <input id="searchInput" type="text" placeholder="اكتب اسم الراوي (مثلاً: الخضر بن محمد)..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none pl-10" />
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                </div>
+                <button type="submit"
+                    class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    بحث
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden text-center py-12">
+            <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4">
+            </div>
+            <p class="text-gray-500">جاري البحث في قاعدة البيانات...</p>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResultsState" class="hidden text-center py-12 bg-gray-50 rounded-lg border border-gray-200 mt-8">
+            <i data-lucide="search-x" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
+            <h3 class="text-lg font-bold text-gray-700">لم يتم العثور على نتائج</h3>
+            <p class="text-gray-500">حاول البحث باستخدام جزء من الاسم أو اسم الشهرة.</p>
+        </div>
+
+        <!-- Results List -->
+        <div id="resultsList" class="max-w-4xl mx-auto hidden mt-8"></div>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 border-t border-gray-200 bg-white">
+        <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, limit, startAt, endAt, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjkJ45NsQgz1c7V1mUsnrORMYx8WceDdQ",
+            authDomain: "trajum-almaktaba.firebaseapp.com",
+            projectId: "trajum-almaktaba",
+            storageBucket: "trajum-almaktaba.firebasestorage.app",
+            messagingSenderId: "589922811454",
+            appId: "1:589922811454:web:b038cd26b4f02048cadb6f",
+            measurementId: "G-SBTBFCQ7Z9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const COLLECTION_NAME = 'scholars';
+
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const resultsList = document.getElementById('resultsList');
+        const loadingState = document.getElementById('loadingState');
+        const noResultsState = document.getElementById('noResultsState');
+
+        lucide.createIcons();
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const term = searchInput.value.trim();
+            if (!term) return;
+
+            showLoading();
+
+            try {
+                // Search Logic: Simple prefix search on 'Name' field
+                // Note: Ideally we want full text search, but Firestore is limited.
+                // We will try exact match reference or prefix.
+
+                const narratorsRef = collection(db, COLLECTION_NAME);
+
+                // Try searching by exact name or prefix
+                // Field name mapping: "الاسم"
+                const q = query(
+                    narratorsRef,
+                    where("الاسم", ">=", term),
+                    where("الاسم", "<=", term + '\uf8ff'),
+                    limit(20)
+                );
+
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    // Try searching by ID if it's a number
+                    if (!isNaN(term)) {
+                        const qId = query(narratorsRef, where("id", "==", Number(term)), limit(1));
+                        const snapId = await getDocs(qId);
+                        if (!snapId.empty) {
+                            renderResults(snapId.docs);
+                            return;
+                        }
+                    }
+                    showNoResults();
+                } else {
+                    renderResults(snapshot.docs);
+                }
+
+            } catch (error) {
+                console.error("Search error:", error);
+                resultsList.innerHTML = `<div class="text-center text-red-500 py-4">حدث خطأ أثناء البحث: ${error.message}<br>يرجى التأكد من اسم المجموعة (Collection Name) في قاعدة البيانات.</div>`;
+                resultsList.classList.remove('hidden');
+                loadingState.classList.add('hidden');
+            }
+        });
+
+        function showLoading() {
+            loadingState.classList.remove('hidden');
+            resultsList.classList.add('hidden');
+            noResultsState.classList.add('hidden');
+        }
+
+        function showNoResults() {
+            loadingState.classList.add('hidden');
+            noResultsState.classList.remove('hidden');
+        }
+
+        function renderResults(docs) {
+            resultsList.innerHTML = '';
+            loadingState.classList.add('hidden');
+            resultsList.classList.remove('hidden');
+
+            docs.forEach(doc => {
+                const data = doc.data();
+                const id = doc.id; // Document ID
+                const name = data['الاسم'] || 'بدون اسم';
+                const rankIbnHajar = data['الرتبة عند ابن حجر'] || '';
+                const rankDhahabi = data['الرتبة عند الذهبي'] || '';
+                const deathDate = data['تاريخ الوفاة'] || '';
+
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-xl font-bold font-serif text-blue-700 mb-2">
+                <a href="details_jarh.html?id=${id}" class="hover:text-blue-800 transition-colors">${name}</a>
+              </h3>
+              <div class="flex flex-wrap gap-2 text-sm text-gray-600 mb-3">
+                ${rankIbnHajar ? `<span class="meta-tag">ابن حجر: ${rankIbnHajar}</span>` : ''}
+                ${rankDhahabi ? `<span class="meta-tag">الذهبي: ${rankDhahabi}</span>` : ''}
+                ${deathDate ? `<span class="meta-tag">توفي: ${deathDate}</span>` : ''}
+              </div>
+            </div>
+            <a href="details_jarh.html?id=${id}" class="text-gray-400 hover:text-blue-600">
+              <i data-lucide="chevron-left" class="w-6 h-6"></i>
+            </a>
+          </div>
+        `;
+                resultsList.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+    </script>
+</body>
+
+</html>

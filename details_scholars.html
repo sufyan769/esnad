@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفاصيل العالم - موسوعة البيان</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="reader-body">
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i data-lucide="library"></i>
+                <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
+                        class="brand-accent">البيان</span></span>
+            </a>
+                  <div class="nav-links">
+        <a href="index.html?tab=hadith" class="nav-link">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+        <a href="index.html?tab=scholars" class="nav-link active">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="index.html?tab=history" class="nav-link">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          سير الأعلام
+        </a>
+        <a href="index.html?tab=jarh" class="nav-link">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          الجرح والتعديل
+        </a>
+        <a href="index.html?tab=fatawa" class="nav-link">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="index.html?tab=firebase" class="nav-link">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+        </div>
+    </nav>
+
+    <div
+        style="padding: 10px 0; background: #f8f9fa; border-bottom: 1px solid var(--border-color); position: sticky; top: 60px; z-index: 40;">
+        <div class="container-fluid flex justify-between items-center">
+            <button onclick="window.location.href='index.html?tab=scholars'"
+                class="flex items-center gap-2 text-gray-500 hover:text-[#00538b] transition-colors text-sm font-bold bg-transparent border-none cursor-pointer">
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <span>العودة للبحث</span>
+            </button>
+            <div class="flex gap-3">
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="flex items-center justify-center h-screen">
+        <div class="w-10 h-10 border-4 border-[#00538b] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <div id="viewContainer" class="reader-container hidden">
+        <div class="article-header">
+            <h1 id="viewTitle" class="article-title"></h1>
+            <div id="metaBar" class="meta-bar"></div>
+        </div>
+
+        <div id="viewText" class="article-text font-bold"></div>
+    </div>
+
+    <div class="fab-container reader-fabs print:hidden">
+        <button id="increaseFont" class="fab primary" title="تكبير النص">
+            <i data-lucide="zoom-in" class="w-5 h-5"></i>
+        </button>
+        <button id="decreaseFont" class="fab" title="تصغير النص">
+            <i data-lucide="zoom-out" class="w-5 h-5"></i>
+        </button>
+        <button id="backToResults" class="fab" title="العودة لنتائج البحث">
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+    </div>
+
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
+        import { updateSEO } from './seo_optimizer.js';
+
+        const CONFIG = {
+            firebase: {
+                apiKey: "AIzaSyBni4eUpBlMrBVr-I-_bTLDyYpdJgkBnpw",
+                authDomain: "islsm-9.firebaseapp.com",
+                projectId: "islsm-9",
+                storageBucket: "islsm-9.firebasestorage.app",
+                messagingSenderId: "940034885206",
+                appId: "1:940034885206:web:4013d7a5297f2ff7b41df7"
+            },
+            algolia: { appId: "3XD12I7386", apiKey: "981ea91e88c65be8aadf2113c207b9c5", index: "trajum" },
+            collection: 'scholars_biographies'
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        let docId = params.get("id");
+        if (!docId) {
+            const match = window.location.pathname.match(/\/scholar\/([^\/]+)/i);
+            if (match && match[1]) docId = match[1];
+        }
+        const searchTerm = params.get("q");
+
+        const app = initializeApp(CONFIG.firebase, 'scholarsApp');
+        const db = getFirestore(app);
+        const algoliaClient = algoliasearch(CONFIG.algolia.appId, CONFIG.algolia.apiKey);
+        const algoliaIndex = algoliaClient.initIndex(CONFIG.algolia.index);
+
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const viewContainer = document.getElementById('viewContainer');
+        const viewTitle = document.getElementById('viewTitle');
+        const metaBar = document.getElementById('metaBar');
+        const viewText = document.getElementById('viewText');
+
+
+        let currentData = null;
+        let currentFontSize = 24;
+
+        lucide.createIcons();
+
+        function updateFontSize() {
+            viewText.style.fontSize = `${currentFontSize}px`;
+            viewText.style.lineHeight = 1.65;
+        }
+        document.getElementById('increaseFont').addEventListener('click', () => { if (currentFontSize < 48) { currentFontSize += 2; updateFontSize(); } });
+        document.getElementById('decreaseFont').addEventListener('click', () => { if (currentFontSize > 16) { currentFontSize -= 2; updateFontSize(); } });
+        document.getElementById('backToResults').addEventListener('click', () => {
+            if (document.referrer && document.referrer.includes('index.html')) {
+                history.back();
+            } else {
+                window.location.href = 'index.html?tab=scholars';
+            }
+        });
+
+        async function loadData() {
+            if (!docId) return;
+            try {
+                let data = null;
+                // 1. Try direct ID fetch (if docId matches document ID)
+                const ref = doc(db, CONFIG.collection, docId);
+                const snap = await getDoc(ref);
+                if (snap.exists()) {
+                    data = { objectID: snap.id, ...snap.data() };
+                } else {
+                    // 2. Try querying by 'id' field (string)
+                    let q = query(collection(db, CONFIG.collection), where("id", "==", String(docId)), limit(1));
+                    let s = await getDocs(q);
+                    if (!s.empty) {
+                        data = { objectID: s.docs[0].id, ...s.docs[0].data() };
+                    } else {
+                        // 3. Try querying by 'id' field (number)
+                        q = query(collection(db, CONFIG.collection), where("id", "==", Number(docId)), limit(1));
+                        s = await getDocs(q);
+                        if (!s.empty) {
+                            data = { objectID: s.docs[0].id, ...s.docs[0].data() };
+                        }
+                    }
+                }
+
+                if (!data) { loadingSpinner.innerHTML = "<p class='text-red-500'>المحتوى غير موجود</p>"; return; }
+
+                currentData = data;
+                renderView(data);
+
+                if (searchTerm) {
+                    setTimeout(() => {
+                        highlightTerms(viewText, searchTerm);
+                        highlightTerms(viewTitle, searchTerm);
+                    }, 100);
+                }
+
+                loadingSpinner.classList.add('hidden');
+                viewContainer.classList.remove('hidden');
+            } catch (e) { console.error(e); loadingSpinner.innerHTML = "<p class='text-red-500'>حدث خطأ في التحميل</p>"; }
+        }
+
+        function highlightTerms(element, term) {
+            if (!term || !element) return;
+            const terms = term.split(/\s+/).filter(t => t.length > 2);
+            if (terms.length === 0) return;
+            const regex = new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            const nodes = [];
+            let node;
+            while (node = walker.nextNode()) nodes.push(node);
+
+            nodes.forEach(textNode => {
+                const text = textNode.nodeValue;
+                if (regex.test(text)) {
+                    const fragment = document.createDocumentFragment();
+                    let lastIndex = 0;
+                    text.replace(regex, (match, p1, offset) => {
+                        fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+                        const span = document.createElement('span');
+                        span.style.color = '#dc2626';
+                        span.style.fontWeight = 'bold';
+                        span.textContent = match;
+                        fragment.appendChild(span);
+                        lastIndex = offset + match.length;
+                        return match;
+                    });
+                    fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                    textNode.parentNode.replaceChild(fragment, textNode);
+                }
+            });
+        }
+
+        function renderView(data) {
+            metaBar.innerHTML = '';
+            viewText.innerHTML = '';
+
+            viewTitle.textContent = data.name || 'بدون عنوان';
+            addMetaItem('تاريخ الوفاة', data.death);
+            addMetaItem('الاسم الكامل', data.full);
+            addMetaItem('الترتيب', data.rank);
+            addMetaItem('المعرف', docId, true);
+
+            updateSEO(data.name || 'سيرة العالم', data.trj || 'معلومات عن سيرة العالم', window.location.href, 'ProfilePage');
+
+            renderParagraphs(viewText, data.trj);
+            updateFontSize();
+        }
+
+        function addMetaItem(label, value, isMono = false) {
+            if (!value) return;
+            const div = document.createElement('div');
+            div.className = 'meta-item';
+            div.innerHTML = `<span class="meta-label">${label}:</span> <span class="meta-value ${isMono ? 'font-mono' : ''}">${value}</span>`;
+            metaBar.appendChild(div);
+        }
+
+        function renderParagraphs(container, text) {
+            container.innerHTML = '';
+            if (!text) return;
+            const parts = text.split(/(?<=[.])\s+|\n+/);
+            parts.forEach(pText => {
+                const clean = pText.trim();
+                if (clean) {
+                    const p = document.createElement('p');
+                    p.textContent = clean;
+                    container.appendChild(p);
+                }
+            });
+        }
+
+
+
+        loadData();
+    </script>
+</body>
+
+</html>

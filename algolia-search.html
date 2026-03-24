@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>موسوعة الفتاوى - موسوعة البيان</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Noto Naskh Arabic', sans-serif;
+      background: #f8fafc;
+    }
+
+    em {
+      color: #dc2626;
+      font-style: normal;
+      font-weight: 700;
+      background: rgba(254, 202, 202, 0.2);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    .fatwa-results {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .fatwa-card {
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px 18px;
+      background: white;
+      transition: border-color 0.2s ease;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .fatwa-card:hover {
+      border-color: var(--accent-color);
+    }
+
+    .fatwa-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+
+    .fatwa-card p {
+      margin: 10px 0 0 0;
+      color: #475467;
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    .fatwa-card footer {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .fatwa-card__meta {
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .fatwa-card__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .fatwa-chip {
+      border: 1px solid rgba(52, 152, 219, 0.3);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    .fatwa-chip:hover {
+      background: var(--accent-color);
+      color: #fff;
+    }
+
+    .fatwa-card__cta {
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+
+    .fatwa-panel {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+      z-index: 200;
+    }
+
+    .fatwa-panel.hidden {
+      display: none;
+    }
+
+    .fatwa-panel__surface {
+      width: min(900px, 100%);
+      background: white;
+      border-radius: 24px;
+      padding: 28px;
+      max-height: 90vh;
+      overflow: auto;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+    }
+
+    .fatwa-panel__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .fatwa-panel__header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--primary-color);
+      line-height: 1.6;
+    }
+
+    .fatwa-panel__close {
+      border: none;
+      background: #f1f5f9;
+      border-radius: 999px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .fatwa-panel__meta {
+      margin: 14px 0;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .fatwa-panel__body {
+      line-height: 1.9;
+      color: #1f2937;
+    }
+
+    .fatwa-panel__body p {
+      margin-bottom: 1rem;
+    }
+
+    .fatwa-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .fatwa-actions button {
+      border: 1px solid var(--border-color);
+      background: #f8fafc;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--secondary-text);
+    }
+
+    .fatwa-actions button:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i data-lucide="library"></i>
+        <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">البيان</span></span>
+      </a>
+            <div class="nav-links">
+        <a href="index.html?tab=hadith" class="nav-link">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+        <a href="index.html?tab=scholars" class="nav-link">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="index.html?tab=history" class="nav-link">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          سير الأعلام
+        </a>
+        <a href="index.html?tab=jarh" class="nav-link">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          الجرح والتعديل
+        </a>
+        <a href="index.html?tab=fatawa" class="nav-link active">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="index.html?tab=firebase" class="nav-link">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="simple-shell">
+    <section class="search-stack">
+      <div class="stack-header">
+        <div>
+          <p class="eyebrow">موسوعة الفتاوى</p>
+          <h1>ابحث في الأسئلة والأجوبة الشرعية</h1>
+          <p class="lead">نتائج من قاعدة فتاوى موسعة مع إمكانية فتح التفاصيل ونسخ الجواب.</p>
+        </div>
+      </div>
+      <form id="searchForm" class="search-input-wrapper search-input-wrapper--full">
+        <button type="submit" class="search-btn">
+          <i data-lucide="search" class="w-6 h-6"></i>
+        </button>
+        <input id="searchInput" type="text" class="search-input" placeholder="اكتب سؤالك الشرعي..." autocomplete="off">
+      </form>
+    </section>
+
+    <section class="results-panel results-panel--tight">
+      <div id="loadingState" class="hidden state-card">
+        <div class="spinner"></div>
+        <p>جاري البحث في الفتاوى...</p>
+      </div>
+      <div id="noResultsState" class="hidden state-card">
+        <i data-lucide="search-x"></i>
+        <div>
+          <h3>لا توجد نتائج مطابقة</h3>
+          <p>حاول صياغة السؤال بطريقة مختلفة.</p>
+        </div>
+      </div>
+      <div id="resultsList" class="fatwa-results hidden"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <script type="module">
+    import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
+
+    const APP_ID = '3XD12I7386';
+    const API_KEY = '89e8e132a05fdb02275f64dec8d14d05';
+    const INDEX = 'alfatawa';
+
+    const client = algoliasearch(APP_ID, API_KEY);
+    const index = client.initIndex(INDEX);
+
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const loadingState = document.getElementById('loadingState');
+    const noResultsState = document.getElementById('noResultsState');
+    const resultsList = document.getElementById('resultsList');
+
+    let currentHits = [];
+
+    const PLACEHOLDER_DOMAIN = 'https://fatawa-seo.vercel.app';
+    const FATWA_PAGE = 'fatwa.html';
+
+    const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
+    const hasHTMLMarkup = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
+
+    const buildFatwaDetailUrl = (id, query = '') => {
+      let url = id ? `${FATWA_PAGE}?id=${encodeURIComponent(id)}` : '#';
+      if (query && id) {
+        url += `&q=${encodeURIComponent(query)}`;
+      }
+      return url;
+    };
+
+    const rewriteFatwaHref = (href = '') => {
+      if (!href) return href;
+      const cleaned = stripPlaceholderDomain(href);
+      const match = cleaned.match(/fatwa_(\d+)\.html/i);
+      if (match && match[1]) {
+        return buildFatwaDetailUrl(match[1]);
+      }
+      return href;
+    };
+
+    const convertFatwaLinks = (html = '') => {
+      if (!html) return html;
+      return html.replace(/href="([^"]*fatwa_pages\/[^"]*)"/gi, (fullMatch, href) => {
+        return `href="${rewriteFatwaHref(href)}"`;
+      });
+    };
+
+    const renderRichText = (value, { wrapParagraphs = true, fallback = '' } = {}) => {
+      const cleaned = stripPlaceholderDomain(value || '').trim();
+      if (!cleaned) return fallback;
+      if (hasHTMLMarkup(cleaned)) return convertFatwaLinks(cleaned);
+      if (!wrapParagraphs) return cleaned.replace(/\n/g, '<br>');
+
+      // Join single newlines as spaces, preserve double newlines as paragraph breaks
+      const processedText = cleaned
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{2,}/g, '|||')
+        .replace(/\n/g, ' ')
+        .replace(/([.،])\s*/g, '$1|||')
+        .split('|||')
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      return convertFatwaLinks(processedText.map(p => `<p>${p}</p>`).join(''));
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      const params = new URLSearchParams(window.location.search);
+      const term = params.get('q') || '';
+      if (term) {
+        searchInput.value = term;
+        handleSearch(term);
+      }
+    });
+
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const term = searchInput.value.trim();
+      if (!term) return;
+      const url = new URL(window.location);
+      url.searchParams.set('q', term);
+      url.searchParams.delete('id');
+      window.history.pushState({}, '', url);
+      handleSearch(term);
+    });
+
+    async function handleSearch(term) {
+      resultsList.classList.add('hidden');
+      noResultsState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      try {
+        const options = {
+          hitsPerPage: 20,
+          attributesToSnippet: ['answer_snippet:120', 'answer:120', 'text:120'],
+          advancedSyntax: true,
+          removeWordsIfNoResults: 'lastWords',
+          ignorePlurals: true,
+          typoTolerance: 'min',
+          optionalWords: term.split(/\s+/).filter(w => w.length > 3)
+        };
+
+        let { hits } = await index.search(term, options);
+
+        if (!hits.length && term.includes(' ')) {
+          const fallback = term.split(/\s+/).find(w => w.length >= 3);
+          if (fallback) {
+            ({ hits } = await index.search(fallback, options));
+          }
+        }
+
+        currentHits = hits.map(normalizeHit);
+        loadingState.classList.add('hidden');
+        if (currentHits.length === 0) {
+          noResultsState.classList.remove('hidden');
+          return;
+        }
+        renderResults(currentHits);
+      } catch (err) {
+        loadingState.classList.add('hidden');
+        noResultsState.classList.remove('hidden');
+        noResultsState.querySelector('p').textContent = 'حدث خطأ أثناء البحث. حاول لاحقاً.';
+        console.error(err);
+      }
+    }
+
+    function normalizeHit(hit) {
+      let id = hit.objectID || hit.id;
+      if (!id && hit.source) {
+        const match = hit.source.match(/fatwa_(\d+)/i);
+        if (match && match[1]) id = match[1];
+      }
+      if (!id && hit.source) id = hit.source;
+      const snippet = hit._snippetResult?.answer_snippet?.value ||
+        hit._snippetResult?.answer?.value ||
+        hit._snippetResult?.text?.value ||
+        hit.answer_snippet ||
+        hit.answer ||
+        hit.text || '';
+
+      const question = hit._highlightResult?.question?.value ||
+        hit._highlightResult?.title?.value ||
+        hit.question ||
+        hit.title ||
+        'سؤال بدون عنوان';
+
+      const source = hit.source || '';
+      return {
+        id,
+        question: stripPlaceholderDomain(question),
+        snippet: stripPlaceholderDomain(snippet),
+        source,
+        raw: hit
+      };
+    }
+
+    const buildCategoryChips = (values) => {
+      if (!values) return '';
+      const list = Array.isArray(values) ? values : [values];
+      const filtered = list.filter(Boolean);
+      if (!filtered.length) return '';
+      const chips = filtered.map(cat => {
+        const label = typeof cat === 'string' ? cat : String(cat);
+        const href = `algolia-search.html?q=${encodeURIComponent(label)}`;
+        return `<a class="fatwa-chip" href="${href}">${label}</a>`;
+      }).join('');
+      return `<div class="fatwa-card__chips">${chips}</div>`;
+    };
+
+    function renderResults(items) {
+      resultsList.innerHTML = '';
+      items.forEach(item => {
+        const article = document.createElement('article');
+        article.className = 'fatwa-card';
+        article.setAttribute('role', 'button');
+        article.setAttribute('tabindex', '0');
+        const questionHTML = renderRichText(item.question, { wrapParagraphs: false, fallback: 'سؤال بدون عنوان' });
+        const snippetHTML = renderRichText(item.snippet, { wrapParagraphs: true, fallback: '<p>لا يوجد نص للجواب.</p>' });
+        const metaBadges = [
+          item.id ? `<span class="badge badge-info">فتوى ${item.id}</span>` : '',
+          item.source ? `<span class="badge badge-warning">${item.source.replace('.html', '')}</span>` : ''
+        ].filter(Boolean).join(' ');
+        const categoryChips = buildCategoryChips(item.raw?.categories);
+        article.innerHTML = `
+          <div class="fatwa-card__meta">${metaBadges}</div>
+          <h3>${questionHTML}</h3>
+          <div class="fatwa-card__snippet">${snippetHTML}</div>
+          ${categoryChips}
+          <footer>
+            <span>${item.source ? `المصدر: ${item.source.replace('.html', '')}` : ''}</span>
+            <span class="fatwa-card__cta">انقر لعرض الجواب</span>
+          </footer>
+        `;
+        article.querySelectorAll('.fatwa-chip').forEach(chip => {
+          chip.addEventListener('click', (e) => e.stopPropagation());
+        });
+        const currentTerm = searchInput.value.trim();
+        article.addEventListener('click', () => navigateToDetail(item.id, currentTerm));
+        article.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            navigateToDetail(item.id, currentTerm);
+          }
+        });
+        resultsList.appendChild(article);
+      });
+      resultsList.classList.remove('hidden');
+    }
+
+    function navigateToDetail(id, term) {
+      if (!id) return;
+      window.location.href = buildFatwaDetailUrl(id, term);
+    }
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بحث التراجم - موسوعة البيان</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700&family=Scheherazade+New:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    :root {
+      --wiki-border: #a2a9b1;
+      --wiki-bg: #ffffff;
+      --wiki-link: #3366cc;
+      --wiki-gray: #f8f9fa;
+    }
+
+    body.wiki-body {
+      font-family: 'Cairo', sans-serif;
+      background-color: var(--wiki-bg);
+      color: #202122;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Amiri', serif;
+    }
+
+    .wiki-link {
+      color: var(--wiki-link);
+      text-decoration: none;
+    }
+
+    .wiki-link:hover {
+      text-decoration: none;
+      color: #2a4b8d;
+    }
+
+    .wiki-box {
+      background: #fff;
+      border: 1px solid var(--wiki-border);
+    }
+
+    .wiki-header {
+      border-bottom: 1px solid var(--wiki-border);
+    }
+
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .highlight-red {
+      color: #dc2626;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body class="wiki-body">
+
+  <!-- Unified Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i data-lucide="library"></i>
+        <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">البيان</span></span>
+      </a>
+            <div class="nav-links">
+        <a href="index.html?tab=hadith" class="nav-link">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+        <a href="index.html?tab=scholars" class="nav-link">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="index.html?tab=history" class="nav-link">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          سير الأعلام
+        </a>
+        <a href="index.html?tab=jarh" class="nav-link">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          الجرح والتعديل
+        </a>
+        <a href="index.html?tab=fatawa" class="nav-link">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="index.html?tab=firebase" class="nav-link active">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Wikipedia-like Header -->
+  <nav class="border-b border-[#a2a9b1] bg-[#f8f9fa] mb-6">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-serif font-bold text-xl">
+          و
+        </div>
+        <div class="flex flex-col leading-tight">
+          <span class="font-serif text-xl font-bold text-black">الموسوعة</span>
+          <span class="text-xs text-stone-600">باستخدام بحث Firebase</span>
+        </div>
+      </div>
+
+      <div class="flex-1"></div>
+
+      <div class="hidden sm:block text-sm text-stone-500">
+        مرحباً بك في موسوعة العلماء
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
+
+    <!-- Main Content Column -->
+    <div class="lg:col-span-3 space-y-6">
+
+      <!-- Search Box (Wiki Style) -->
+      <div class="bg-[#f8f9fa] p-4 border border-[#a2a9b1] rounded-sm">
+        <form id="searchForm" class="flex gap-2">
+          <input id="searchInput" type="text" placeholder="ابحث في Firebase"
+            class="flex-1 px-3 py-2 border border-[#a2a9b1] focus:ring-2 focus:ring-[#3366cc] focus:border-[#3366cc] outline-none" />
+          <button type="submit"
+            class="bg-[#3366cc] text-white px-6 py-2 font-bold text-sm hover:bg-[#2a4b8d] transition-colors border border-[#3366cc]">
+            بحث
+          </button>
+        </form>
+      </div>
+
+      <!-- States -->
+      <div id="loadingState" class="hidden text-center py-8">
+        <div class="w-6 h-6 border-2 border-[#3366cc] border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p class="text-sm text-stone-500 mt-2">جاري البحث...</p>
+      </div>
+
+      <div id="noResultsState" class="hidden p-4 bg-yellow-50 border border-yellow-200 text-stone-700">
+        <p>لم يتم العثور على نتائج مطابقة لبحثك.</p>
+      </div>
+
+      <!-- Search Results List -->
+      <div id="resultsList" class="space-y-4 hidden">
+        <h2 class="text-2xl font-serif border-b border-[#a2a9b1] pb-2 mb-4">نتائج البحث</h2>
+      </div>
+
+      <!-- Featured Section -->
+      <div id="featuredSection">
+        <div class="bg-[#f8f9fa] border border-[#a2a9b1] p-1 mb-4">
+          <h2
+            class="text-xl font-serif bg-white border-b border-[#a2a9b1] px-4 py-2 font-bold text-[#202122] flex items-center gap-2">
+            <i data-lucide="star" class="w-4 h-4 text-yellow-600 fill-yellow-600"></i>
+            مختارات من التراجم
+          </h2>
+        </div>
+
+        <div id="featuredLoader" class="text-center py-8">
+          <div class="w-6 h-6 border-2 border-[#3366cc] border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+
+        <div id="featuredGrid" class="grid grid-cols-1 gap-6"></div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="hidden lg:block col-span-1 space-y-4">
+      <div class="bg-[#f8f9fa] border border-[#a2a9b1] p-4 text-sm">
+        <h3 class="font-bold border-b border-[#a2a9b1] pb-2 mb-2">حول الموسوعة</h3>
+        <p class="mb-2">مشروع يهدف لجمع تراجم العلماء في مكان واحد وتسهيل الوصول إليها.</p>
+        <p>عدد المقالات: <span id="totalCount" class="font-bold">-</span></p>
+      </div>
+
+      <div class="bg-[#f8f9fa] border border-[#a2a9b1] p-4 text-sm">
+        <h3 class="font-bold border-b border-[#a2a9b1] pb-2 mb-2">أدوات</h3>
+        <ul class="space-y-1 text-[#3366cc]">
+          <li><a href="#" class="hover:underline">صفحة عشوائية</a></li>
+          <li><a href="#" class="hover:underline">فهرس الأعلام</a></li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-[#a2a9b1] bg-[#f8f9fa] mt-auto py-6">
+    <div class="max-w-5xl mx-auto px-4 text-center text-xs text-stone-600">
+      <p>النص متوفر تحت رخصة المشاع الإبداعي.</p>
+      <p class="mt-1">سياسة الخصوصية | حول الموسوعة | إخلاء مسؤولية</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBni4eUpBlMrBVr-I-_bTLDyYpdJgkBnpw",
+      authDomain: "islsm-9.firebaseapp.com",
+      projectId: "islsm-9",
+      storageBucket: "islsm-9.firebasestorage.app",
+      messagingSenderId: "940034885206",
+      appId: "1:940034885206:web:4013d7a5297f2ff7b41df7",
+      measurementId: "G-JF11WVCY5P"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const CACHE_KEY = 'scholar_search_cache';
+    const FEATURED_CACHE_KEY = 'scholar_featured_cache';
+    const FEATURED_CACHE_TTL = 3 * 24 * 60 * 60 * 1000;
+
+    const form = document.getElementById("searchForm");
+    const input = document.getElementById("searchInput");
+    const resultsList = document.getElementById("resultsList");
+    const featuredSection = document.getElementById("featuredSection");
+    const featuredGrid = document.getElementById("featuredGrid");
+    const featuredLoader = document.getElementById("featuredLoader");
+    const loadingState = document.getElementById("loadingState");
+    const noResultsState = document.getElementById("noResultsState");
+    const totalCountEl = document.getElementById("totalCount");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+      const searchCache = sessionStorage.getItem(CACHE_KEY);
+      if (searchCache) {
+        try {
+          const { term, docs, scrollY } = JSON.parse(searchCache);
+          if (term) input.value = term;
+          if (docs && docs.length > 0) {
+            renderSearchResults(docs);
+            if (scrollY) setTimeout(() => window.scrollTo(0, scrollY), 0);
+            return;
+          }
+        } catch (e) {
+          sessionStorage.removeItem(CACHE_KEY);
+        }
+      }
+
+      loadFeaturedContent();
+      loadCounts();
+    });
+
+    async function loadCounts() {
+      try {
+        const q = query(collection(db, "scholars_biographies"), limit(1));
+        await getDocs(q);
+        totalCountEl.textContent = "+1000";
+      } catch {
+        totalCountEl.textContent = "-";
+      }
+    }
+
+    async function loadFeaturedContent() {
+      try {
+        let candidates = [];
+        const now = Date.now();
+        const cachedFeatured = localStorage.getItem(FEATURED_CACHE_KEY);
+        let needsFetch = true;
+
+        if (cachedFeatured) {
+          const { timestamp, docs } = JSON.parse(cachedFeatured);
+          if (now - timestamp < FEATURED_CACHE_TTL && docs.length > 0) {
+            candidates = docs;
+            needsFetch = false;
+          }
+        }
+
+        if (needsFetch) {
+          const q = query(collection(db, "scholars_biographies"), limit(50));
+          const snap = await getDocs(q);
+          candidates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          localStorage.setItem(FEATURED_CACHE_KEY, JSON.stringify({ timestamp: now, docs: candidates }));
+        }
+
+        renderFeatured(pickRandom(candidates, 7));
+        featuredLoader.classList.add('hidden');
+      } catch (err) {
+        console.error(err);
+        featuredLoader.classList.add('hidden');
+        featuredGrid.innerHTML = '<p class="text-red-500 text-center">تعذر تحميل المختارات.</p>';
+      }
+    }
+
+    function pickRandom(arr, count) {
+      const shuffled = [...arr].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function renderFeatured(items) {
+      featuredGrid.innerHTML = '';
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "bg-white p-5 border border-[#a2a9b1] hover:border-[#3366cc] transition-colors relative";
+
+        let excerpt = "لا يوجد نص.";
+        if (item.trj) {
+          excerpt = item.trj.replace(/\n/g, ' ').substring(0, 300);
+        }
+
+        div.innerHTML = `
+          <h3 class="text-xl font-serif font-bold mb-2">
+            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] decoration-[#3366cc]">
+              ${item.name}
+            </a>
+          </h3>
+          <p class="text-sm text-[#202122] leading-relaxed line-clamp-3 font-serif">
+            ${excerpt}...
+          </p>
+          <div class="mt-3 text-xs text-stone-500 flex gap-3">
+            ${item.death ? `<span>(ت: ${item.death})</span>` : ''}
+            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] mr-auto">اقرأ المزيد &larr;</a>
+          </div>
+        `;
+        featuredGrid.appendChild(div);
+      });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const term = input.value.trim();
+      if (!term) return;
+
+      featuredSection.classList.add('hidden');
+      resultsList.classList.add('hidden');
+      resultsList.innerHTML = '';
+      noResultsState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      sessionStorage.removeItem(CACHE_KEY);
+
+      try {
+        const colRef = collection(db, "scholars_biographies");
+        const q = query(colRef, where("aliases", "array-contains", term));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          loadingState.classList.add("hidden");
+          noResultsState.classList.remove("hidden");
+          return;
+        }
+
+        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ term, docs, scrollY: 0 }));
+        renderSearchResults(docs);
+      } catch (err) {
+        console.error(err);
+        loadingState.classList.add("hidden");
+        resultsList.classList.remove("hidden");
+        resultsList.innerHTML = "<p class='text-red-600'>حدث خطأ أثناء الاتصال.</p>";
+      }
+    });
+
+    function renderSearchResults(docs) {
+      loadingState.classList.add("hidden");
+      featuredSection.classList.add('hidden');
+      resultsList.classList.remove("hidden");
+      resultsList.innerHTML = '<h2 class="text-2xl font-serif border-b border-[#a2a9b1] pb-2 mb-4">نتائج البحث</h2>';
+
+      const term = input.value.trim();
+      const regex = term ? new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi') : null;
+
+      docs.forEach(doc => {
+        const div = document.createElement('div');
+        div.className = "mb-4 pb-4 border-b border-stone-100 last:border-0";
+
+        let excerpt = "";
+        if (doc.trj) excerpt = doc.trj.substring(0, 150) + "...";
+
+        let nameHtml = doc.name;
+        let excerptHtml = excerpt;
+
+        if (regex) {
+          nameHtml = nameHtml.replace(regex, '<span class="highlight-red">$1</span>');
+          excerptHtml = excerptHtml.replace(regex, '<span class="highlight-red">$1</span>');
+        }
+
+        div.innerHTML = `
+          <div class="mb-1">
+            <a href="details_scholars.html?id=${doc.id}&q=${encodeURIComponent(term)}" class="text-xl text-[#3366cc] hover:text-[#2a4b8d] font-serif font-bold">
+              ${nameHtml}
+            </a>
+          </div>
+          <div class="text-sm text-[#54595d] mb-1">
+            ${doc.death ? `توفي سنة: ${doc.death}` : ''}
+          </div>
+          <p class="text-sm text-[#202122] line-clamp-2">
+            ${excerptHtml}
+          </p>
+        `;
+
+        div.querySelector('a').addEventListener('click', () => {
+          const currentCache = sessionStorage.getItem(CACHE_KEY);
+          if (currentCache) {
+            const parsed = JSON.parse(currentCache);
+            parsed.scrollY = window.scrollY;
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(parsed));
+          }
+        });
+
+        resultsList.appendChild(div);
+      });
+    }
+  </script>
+</body>
+
+</html>
