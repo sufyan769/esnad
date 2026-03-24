@@ -3,23 +3,23 @@
   "rewrites": [
     {
       "source": "/fatwa/:id",
-      "destination": "/fatwa.html?id=$id"
+      "destination": "/fatwa.html?id=:id"
     },
     {
       "source": "/hadith/:id",
-      "destination": "/details_hadith.html?id=$id"
+      "destination": "/details_hadith.html?id=:id"
     },
     {
       "source": "/scholar/:id",
-      "destination": "/details_scholars.html?id=$id"
+      "destination": "/details_scholars.html?id=:id"
     },
     {
       "source": "/history/:id",
-      "destination": "/history.html?id=$id"
+      "destination": "/history.html?id=:id"
     },
     {
       "source": "/jarh/:id",
-      "destination": "/details_jarh.html?id=$id"
+      "destination": "/details_jarh.html?id=:id"
     }
   ]
 }
