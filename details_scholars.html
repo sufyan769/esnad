@@ -115,7 +115,7 @@
         let docId = params.get("id");
         if (!docId) {
             const match = window.location.pathname.match(/\/scholar\/([^\/]+)/i);
-            if (match && match[1]) docId = match[1];
+            if (match && match[1]) docId = decodeURIComponent(match[1]);
         }
         const searchTerm = params.get("q");
 

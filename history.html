@@ -735,7 +735,7 @@
                 let id = params.get('id');
                 if (!id) {
                     const match = window.location.pathname.match(/\/history\/([^\/]+)/i);
-                    if (match && match[1]) id = match[1];
+                    if (match && match[1]) id = decodeURIComponent(match[1]);
                 }
                 if (id) {
                     // Fetch specific object
