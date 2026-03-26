@@ -3,10 +3,6 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/',
-        destination: '/index.html'
-      },
-      {
         source: '/fatwa',
         destination: '/fatwa.html'
       },
@@ -22,6 +18,11 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: '/index.html',
+        destination: '/',
+        permanent: true
+      },
       {
         source: '/fatwa_pages/fatwa_:id.html',
         destination: '/fatwa/:id',
