@@ -256,9 +256,8 @@ export default async function HadithPage({ params }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {similarHadiths.map(hit => (
                       <Link key={hit.objectID} href={`/hadith/${hit.objectID}`} 
-                            style={{ display: 'block', textDecoration: 'none', background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'border 0.2s, box-shadow 0.2s' }}
-                            onMouseOver={(e) => {e.currentTarget.style.borderColor = '#027d8d'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}}
-                            onMouseOut={(e) => {e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'}}>
+                            className="block bg-white p-4 rounded-lg border border-slate-200 transition-all hover:border-[#027d8d] hover:shadow-md"
+                            style={{ textDecoration: 'none' }}>
                         <p style={{ color: '#334155', fontSize: '1.05rem', lineHeight: '1.6', margin: '0 0 8px 0', fontFamily: "'Amiri', serif" }}>
                           {hit.text ? hit.text.substring(0, 100) + '...' : 'نص الحديث'}
                         </p>
@@ -281,9 +280,8 @@ export default async function HadithPage({ params }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {relatedFatawa.map(hit => (
                       <Link key={hit.objectID} href={`/fatwa/${hit.objectID}`} 
-                            style={{ display: 'block', textDecoration: 'none', background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #f4e6c5', transition: 'border 0.2s, box-shadow 0.2s' }}
-                            onMouseOver={(e) => {e.currentTarget.style.borderColor = '#92400e'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}}
-                            onMouseOut={(e) => {e.currentTarget.style.borderColor = '#f4e6c5'; e.currentTarget.style.boxShadow = 'none'}}>
+                            className="block bg-white p-4 rounded-lg border border-[#f4e6c5] transition-all hover:border-[#92400e] hover:shadow-md"
+                            style={{ textDecoration: 'none' }}>
                         <p style={{ color: '#0f172a', fontSize: '1.05rem', fontWeight: 'bold', lineHeight: '1.5', margin: '0 0 8px 0' }}>
                           {hit.question ? hit.question.replace('https://your-site.com', '').substring(0, 90) + '...' : 'سؤال الفتوى'}
                         </p>
