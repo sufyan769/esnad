@@ -4,6 +4,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import algoliasearch from "algoliasearch";
 import { SearchIcon, BookOpen, ScrollText } from 'lucide-react';
+import BackButton from '@/components/BackButton';
 
 export const revalidate = 3600; // Cache page for 1 hour
 
@@ -129,11 +130,19 @@ export default async function HadithPage({ params }) {
   const muhaddith = getFieldVal(data.muhaddith);
   const page_or_number = getFieldVal(data.page_or_number);
 
-  // Formatting paragraphs
+  // Formatting paragraphs and cleaning dirty HTML
   const formatParagraphs = (str) => {
     if (!str) return '';
     const clean = str.replace(/(<([^>]+)>)/gi, "");
-    if (str !== clean) return str; // return as is if it has html tags
+    
+    // If it has HTML tags from DB, just remove inline styles that break layout
+    if (str !== clean) {
+      return str
+        .replace(/style="[^"]*"/gi, "")
+        .replace(/dir="[^"]*"/gi, "")
+        .replace(/width="[^"]*"/gi, "")
+        .replace(/margin[^=]*="[^"]*"/gi, "");
+    }
 
     const processed = str
       .replace(/\\r\\n/g, '\n')
@@ -167,18 +176,16 @@ export default async function HadithPage({ params }) {
 
       <section className="reader-toolbar">
         <div className="nav-container">
-          <Link href="/?tab=hadith" className="reader-return">
-            &rarr; العودة لنتائج الأحاديث
-          </Link>
+          <BackButton title="العودة لنتائج الأحاديث" fallbackHref="/?tab=hadith" />
         </div>
       </section>
 
-      {/* Using max-width 1100px to utilize empty space, adding generous 80px padding */}
-      <div className="reader-container" style={{ maxWidth: '1100px', width: '92%', padding: '80px', marginTop: '40px', marginBottom: '80px' }}>
+      {/* Using max-width 1100px to utilize empty space, adding generous 80px padding and cleaning inline overrides */}
+      <div className="reader-container" style={{ maxWidth: '1100px', width: '92%', padding: '60px 8%', paddingRight: '10%', marginTop: '40px', marginBottom: '80px', overflowX: 'hidden' }}>
         
         {/* Hadith Core Text */}
-        <header className="article-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h1 style={{ fontFamily: "'Amiri', serif", fontSize: '2.4rem', lineHeight: '2.0', color: '#011e1f', marginBottom: '30px' }} 
+        <header className="article-header" style={{ textAlign: 'center', marginBottom: '60px', paddingRight: '20px', paddingLeft: '20px' }}>
+          <h1 style={{ fontFamily: "'Amiri', serif", fontSize: '2.4rem', lineHeight: '2.0', color: '#011e1f', marginBottom: '30px', marginInline: '0', paddingInline: '0' }} 
               dangerouslySetInnerHTML={{ __html: formattedText }} />
         </header>
 
