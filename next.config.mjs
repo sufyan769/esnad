@@ -11,10 +11,6 @@ const nextConfig = {
         destination: '/fatwa.html'
       },
       {
-        source: '/scholar/:id',
-        destination: '/details_scholars.html?id=:id'
-      },
-      {
         source: '/history',
         destination: '/history.html'
       },
@@ -45,6 +41,18 @@ const nextConfig = {
           }
         ],
         destination: '/hadith/:id',
+        permanent: true
+      },
+      {
+        source: '/details_scholars.html',
+        has: [
+          {
+            type: 'query',
+            key: 'id',
+            value: '(?<id>.*)'
+          }
+        ],
+        destination: '/scholar/:id',
         permanent: true
       }
     ];
