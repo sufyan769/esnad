@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase once
-const app = getApps().length > 0 ? getApp('hadithApp') : initializeApp(firebaseConfig, 'hadithApp');
+const app = getApps().find(a => a.name === 'hadithApp') ? getApp('hadithApp') : initializeApp(firebaseConfig, 'hadithApp');
 const db = getFirestore(app);
 
 // Initialize Algolia Clients

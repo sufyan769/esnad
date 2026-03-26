@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import algoliasearch from 'algoliasearch/lite';
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
 import Link from 'next/link';
 import { Search, BookOpenCheck, Users, Scroll, Scale, Book, Database, SearchX, BookOpen } from 'lucide-react';
@@ -71,11 +71,15 @@ export default function SearchApp() {
   useEffect(() => {
     // Initialize standard clients once on mount
     if (!db) {
-      const app = initializeApp(CONFIG.firebase, "main_firebase");
+      const getOrCreateApp = (config, name) => getApps().find(a => a.name === name) ? getApp(name) : initializeApp(config, name);
+      
+      const app = getOrCreateApp(CONFIG.firebase, "main_firebase");
       db = getFirestore(app);
-      const scholarApp = initializeApp(CONFIG.scholarFirebase, "main_scholarApp");
+      
+      const scholarApp = getOrCreateApp(CONFIG.scholarFirebase, "main_scholarApp");
       scholarDb = getFirestore(scholarApp);
-      const jarhApp = initializeApp(CONFIG.jarhFirebase, "main_jarhApp");
+      
+      const jarhApp = getOrCreateApp(CONFIG.jarhFirebase, "main_jarhApp");
       jarhDb = getFirestore(jarhApp);
 
       clients = {

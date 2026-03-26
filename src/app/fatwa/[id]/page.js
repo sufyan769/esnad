@@ -13,7 +13,7 @@ const config = {
   apiKey: "AIzaSyCDd6yexG726yM-c4gU1jY2gL3OIfD2xZY",
   projectId: "islsm-9",
 };
-const app = getApps().length > 0 ? getApp('fatawaApp') : initializeApp(config, 'fatawaApp');
+const app = getApps().find(a => a.name === 'fatawaApp') ? getApp('fatawaApp') : initializeApp(config, 'fatawaApp');
 const db = getFirestore(app);
 
 // Initialize Algolia Clients
