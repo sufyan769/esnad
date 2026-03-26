@@ -11,10 +11,6 @@ const nextConfig = {
         destination: '/fatwa.html'
       },
       {
-        source: '/hadith/:id',
-        destination: '/details_hadith.html?id=:id'
-      },
-      {
         source: '/scholar/:id',
         destination: '/details_scholars.html?id=:id'
       },
@@ -37,6 +33,18 @@ const nextConfig = {
       {
         source: '/fatwa_pages/fatwa_:id.html',
         destination: '/fatwa/:id',
+        permanent: true
+      },
+      {
+        source: '/details_hadith.html',
+        has: [
+          {
+            type: 'query',
+            key: 'id',
+            value: '(?<id>.*)'
+          }
+        ],
+        destination: '/hadith/:id',
         permanent: true
       }
     ];
