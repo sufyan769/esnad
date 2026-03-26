@@ -48,10 +48,10 @@ export default async function FatwaPage({ params }) {
   
   // Format text (similar to renderRichText)
   const formatText = (text, isAnswer = true) => {
-    let clean = text.replace(/https:\\/\\/your-site.com/g, '');
+    let clean = text.replace(/https:\/\/your-site.com/g, '');
     
     // Replace related fatwa links
-    clean = clean.replace(/href="([^"]*fatwa_pages\\/fatwa_(\\d+)\\.html)"/gi, (match, p1, p2) => {
+    clean = clean.replace(/href=\"([^\\\"]*fatwa_pages\/fatwa_(\\d+)\.html)\"/gi, (match, p1, p2) => {
       return `href="/fatwa/${p2}"`;
     });
 
