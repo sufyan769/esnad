@@ -52,8 +52,8 @@ export default async function FatwaPage({ params }) {
     let clean = text.replace(/https:\/\/your-site.com/g, '');
 
     // Replace related fatwa links
-    clean = clean.replace(/href=\"([^\"]*fatwa_pages\/fatwa_(\d+)\.html)\"/gi, (match, p1, p2) => {
-      return `href=\"/fatwa/${p2}\"`;
+    clean = clean.replace(/href="([^\"]*fatwa_pages\/fatwa_(\d+)\.html)"/gi, (match, p1, p2) => {
+      return `href="/fatwa/${p2}"`;
     });
 
     if (!isAnswer) return clean;
