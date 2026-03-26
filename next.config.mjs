@@ -17,10 +17,6 @@ const nextConfig = {
       {
         source: '/history/:id',
         destination: '/history.html?id=:id'
-      },
-      {
-        source: '/jarh/:id',
-        destination: '/details_jarh.html?id=:id'
       }
     ];
   },
@@ -53,6 +49,18 @@ const nextConfig = {
           }
         ],
         destination: '/scholar/:id',
+        permanent: true
+      },
+      {
+        source: '/details_jarh.html',
+        has: [
+          {
+            type: 'query',
+            key: 'id',
+            value: '(?<id>.*)'
+          }
+        ],
+        destination: '/jarh/:id',
         permanent: true
       }
     ];
