@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>سير الأعلام - موسوعة البيان</title>
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Suppress console warnings and errors
+        if (typeof window !== 'undefined') {
+            // Suppress Tailwind CDN warning
+            const originalWarn = console.warn;
+            console.warn = function (...args) {
+                const msg = args[0];
+                if (msg && typeof msg === 'string') {
+                    // Suppress Tailwind CDN warning
+                    if (msg.includes('cdn.tailwindcss.com')) return;
+                    // Suppress Babel transformer warning
+                    if (msg.includes('in-browser Babel transformer')) return;
+                    if (msg.includes('babeljs.io/docs/setup')) return;
+                }
+                originalWarn.apply(console, args);
+            };
+
+            // Suppress Algolia 404 errors during navigation
+            const originalError = console.error;
+            console.error = function (...args) {
+                const msg = String(args[0] || '');
+                // Suppress Algolia navigation errors (expected when reaching content boundaries)
+                if (msg.includes('algolia') || msg.includes('404')) {
+                    return;
+                }
+                originalError.apply(console, args);
+            };
+        }
+    </script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons (for Navbar) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Naskh Arabic"', 'sans-serif'],
+                        serif: ['"Amiri"', 'serif'],
+                    },
+                    colors: {
+                        'wiki-bg': '#f8f9fa',
+                        'wiki-border': '#a2a9b1',
+                        'wiki-link': '#0645ad',
+                        'wiki-link-visited': '#0b0080',
+                        'wiki-text': '#202122',
+                        'wiki-panel': '#ffffff',
+                        'paper-bg': '#fffbf2',
+                        'paper-border': '#e8e4d9'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Import Map for React and Algolia -->
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "algoliasearch/lite": "https://esm.sh/algoliasearch@4.22.1/dist/algoliasearch.esm.browser.js",
+    "react-instantsearch": "https://esm.sh/react-instantsearch@7.7.0?external=react,react-dom",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react"
+  }
+}
+</script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="antialiased">
+
+    <!-- Unified Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i data-lucide="library"></i>
+                <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
+                        class="brand-accent">البيان</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html?tab=hadith" class="nav-link">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    الحديث الشريف
+                </a>
+                <a href="index.html?tab=scholars" class="nav-link">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    تراجم العلماء
+                </a>
+                <a href="history.html" class="nav-link active">
+                    <i data-lucide="scroll" class="w-4 h-4"></i>
+                    سير الأعلام
+                </a>
+                <a href="algolia-search.html" class="nav-link">
+                    <i data-lucide="book" class="w-4 h-4"></i>
+                    موسوعة الفتاوى
+                </a>
+                <a href="firebase-search.html" class="nav-link">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    بحث Firebase
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="root"></div>
+
+    <script>
+        // Initialize Lucide icons for the navbar
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+        });
+    </script>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useMemo, useEffect, useRef } from 'react';
+        import ReactDOM from 'react-dom/client';
+        import algoliasearch from 'algoliasearch/lite';
+        import {
+            InstantSearch,
+            Configure,
+            useSearchBox,
+            useHits,
+            usePagination,
+            useStats,
+            useRefinementList,
+            useCurrentRefinements,
+            Highlight,
+            Snippet
+        } from 'react-instantsearch';
+        import {
+            Search, Menu, Globe, ChevronLeft, ChevronRight,
+            BookOpen, ArrowRight, ZoomIn, Type, Filter, CheckCircle2, Quote, Plus, Library, ArrowDown, AlertTriangle, Sparkles, SpellCheck
+        } from 'lucide-react';
+
+        // --- Algolia Client Setup ---
+        const APP_ID = '88G4AVERCC';
+        const API_KEY = '33b0b484f534b2ae2dac948d588345a6';
+        const INDEX_NAME = 'algolia_unified';
+
+        const algoliaClient = algoliasearch(APP_ID, API_KEY);
+
+        // Simple in-memory cache
+        const requestCache = new Map();
+
+        const searchClient = {
+            ...algoliaClient,
+            search(requests) {
+                if (requests.every(({ params }) => !params.query && !params.filters && (!params.facets || params.facets.length === 0))) {
+                    return Promise.resolve({
+                        results: requests.map(() => ({
+                            hits: [],
+                            nbHits: 0,
+                            nbPages: 0,
+                            page: 0,
+                            processingTimeMS: 0,
+                        })),
+                    });
+                }
+
+                const cacheKey = JSON.stringify(requests);
+                if (requestCache.has(cacheKey)) {
+                    return Promise.resolve(requestCache.get(cacheKey));
+                }
+
+                return algoliaClient.search(requests).then((response) => {
+                    requestCache.set(cacheKey, response);
+                    return response;
+                });
+            },
+        };
+
+        // --- Components ---
+
+        // --- Components ---
+
+        const Stats = () => {
+            const { nbHits, processingTimeMS, results } = useStats();
+            if (!results || !results.query) return null;
+            return (
+                <div className="text-xs text-secondary-text mt-2 flex gap-2">
+                    <span>النتائج الكلية: <span className="font-bold">{nbHits.toLocaleString('ar-EG')}</span></span>
+                    <span>(تم البحث في {processingTimeMS}ms)</span>
+                </div>
+            );
+        };
+
+        const CustomPagination = () => {
+            const { pages, currentRefinement, refine, isFirstPage, isLastPage, nbHits } = usePagination();
+            if (pages.length === 0 || nbHits === 0) return null;
+
+            return (
+                <div className="flex flex-wrap items-center gap-1 text-sm font-sans mt-6 select-none justify-center">
+                    <button
+                        onClick={() => !isFirstPage && refine(currentRefinement - 1)}
+                        disabled={isFirstPage}
+                        className={`px-3 py-1 rounded border ${isFirstPage ? 'text-gray-300 border-transparent cursor-not-allowed' : 'text-accent border-slate-200 hover:bg-slate-100'}`}
+                    >
+                        السابق
+                    </button>
+                    {pages.map(page => (
+                        <button
+                            key={page}
+                            onClick={() => refine(page)}
+                            className={`px-3 py-1 rounded border min-w-[32px] ${currentRefinement === page
+                                ? 'bg-accent text-white border-accent font-bold'
+                                : 'text-accent border-slate-200 hover:bg-slate-100'
+                                }`}
+                        >
+                            {page + 1}
+                        </button>
+                    ))}
+                    <button
+                        onClick={() => !isLastPage && refine(currentRefinement + 1)}
+                        disabled={isLastPage}
+                        className={`px-3 py-1 rounded border ${isLastPage ? 'text-gray-300 border-transparent cursor-not-allowed' : 'text-accent border-slate-200 hover:bg-slate-100'}`}
+                    >
+                        التالي
+                    </button>
+                </div>
+            );
+        };
+
+        const CustomSearchBox = () => {
+            const { query, refine } = useSearchBox();
+            const [inputValue, setInputValue] = useState(query || '');
+            const [searchMode, setSearchMode] = useState('best');
+            const inputRef = useRef(null);
+
+            useEffect(() => {
+                if (query !== inputValue && query !== undefined) {
+                    if (inputValue === '') setInputValue(query);
+                }
+            }, [query]);
+
+            const buildQuery = (val, mode) => {
+                const cleanVal = val.trim();
+                if (!cleanVal) return '';
+
+                switch (mode) {
+                    case 'phrase': return `"${cleanVal}"`;
+                    case 'and': return cleanVal.split(/\s+/).map(w => `+${w}`).join(' ');
+                    case 'fuzzy': return cleanVal;
+                    case 'best': default: return cleanVal;
+                }
+            };
+
+            const handleSearch = (val, mode) => {
+                const finalQuery = buildQuery(val, mode);
+                refine(finalQuery);
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                handleSearch(inputValue, searchMode);
+            };
+
+            const handleModeChange = (mode) => {
+                setSearchMode(mode);
+                if (inputValue.trim()) {
+                    handleSearch(inputValue, mode);
+                }
+            };
+
+            return (
+                <div className="search-container">
+                    <form onSubmit={handleSubmit} className="search-input-wrapper mb-4">
+                        <input
+                            ref={inputRef}
+                            type="search"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.currentTarget.value)}
+                            placeholder="ابحث في سير الأعلام..."
+                            className="search-input"
+                        />
+                        <button type="submit" className="search-btn">
+                            <Search className="w-5 h-5" />
+                        </button>
+                    </form>
+
+                    <div className="flex justify-center flex-wrap gap-4 text-sm mt-4">
+                        <label className={`cursor-pointer select-none px-3 py-1 rounded-full transition-all ${searchMode === 'best' ? 'bg-blue-100 text-blue-700 font-bold' : 'text-gray-500 hover:bg-gray-100'}`}>
+                            <input type="radio" name="searchMode" className="hidden" checked={searchMode === 'best'} onChange={() => handleModeChange('best')} />
+                            <span>بحث ذكي</span>
+                        </label>
+                        <label className={`cursor-pointer select-none px-3 py-1 rounded-full transition-all ${searchMode === 'phrase' ? 'bg-blue-100 text-blue-700 font-bold' : 'text-gray-500 hover:bg-gray-100'}`}>
+                            <input type="radio" name="searchMode" className="hidden" checked={searchMode === 'phrase'} onChange={() => handleModeChange('phrase')} />
+                            <span>عبارة دقيقة</span>
+                        </label>
+                    </div>
+                </div>
+            );
+        };
+
+        const BookFilter = () => {
+            const { items, refine } = useRefinementList({
+                attribute: 'name', // Updated from book_title
+                sortBy: ['count:desc', 'name:asc'],
+                limit: 20
+            });
+
+            return (
+                <div className="mt-2 mb-4">
+                    <div className="flex items-center justify-end gap-2 mb-2 text-xs text-slate-500">
+                        <span>اختر الكتاب للبحث فيه:</span>
+                        <Library className="w-3 h-3" />
+                    </div>
+                    <div className="flex flex-wrap justify-end gap-3">
+                        {items.map((item) => {
+                            return (
+                                <button
+                                    key={item.value}
+                                    onClick={() => refine(item.value)}
+                                    className={`
+                        group flex items-center gap-3 px-3 py-2 rounded border transition-all
+                        ${item.isRefined
+                                            ? 'bg-white border-wiki-link ring-1 ring-wiki-link shadow-sm'
+                                            : 'bg-white border-slate-300 hover:border-slate-400 hover:bg-slate-50'}
+                    `}
+                                >
+                                    <span className="text-xs font-bold text-slate-400 font-mono">({item.count})</span>
+                                    <span className={`text-sm font-serif ${item.isRefined ? 'text-wiki-link font-bold' : 'text-slate-700'}`}>
+                                        {item.label}
+                                    </span>
+                                    <BookOpen className={`w-4 h-4 ${item.isRefined ? 'text-wiki-link' : 'text-slate-300'}`} />
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        const HitCard = ({ hit, onClick }) => {
+            return (
+                <article className="result-item cursor-pointer" onClick={onClick}>
+                    <div className="result-meta mb-2">
+                        <span className="badge badge-warning">سير الأعلام</span>
+                        <span className="text-xs text-gray-500">{hit.name}</span>
+                        {hit.part_number && <span className="text-xs text-gray-400">• جزء {hit.part_number} صفحة {hit.page_number}</span>}
+                    </div>
+                    <h3 className="result-title">
+                        <Highlight attribute="name" hit={hit} />
+                    </h3>
+                    <div className="result-snippet">
+                        <Snippet attribute="full_intro" hit={hit} />
+                        {!hit.full_intro && <Snippet attribute="text" hit={hit} />}
+                    </div>
+                </article>
+            );
+        };
+
+        const MAX_CHUNKS_PER_ENTRY = 160;
+
+        const extractCharacterId = (hit) => {
+            if (!hit) return null;
+            if (hit.character_id) return String(hit.character_id);
+            if (hit.id) return String(hit.id);
+            if (hit.characterId) return String(hit.characterId);
+            if (typeof hit.objectID === 'string') {
+                return hit.objectID.split('_')[0];
+            }
+            return null;
+        };
+
+        const extractChunkNumber = (hit) => {
+            if (!hit) return 1;
+            const chunkValue = hit.chunk ?? (typeof hit.objectID === 'string' ? hit.objectID.split('_')[1] : null);
+            const parsed = parseInt(chunkValue, 10);
+            return Number.isNaN(parsed) ? 1 : parsed;
+        };
+
+        const buildObjectIdFromParts = (characterId, chunkNumber) => `${characterId}_${chunkNumber}`;
+
+        const fetchChunksForCharacter = async (characterId, initialHit = null) => {
+            if (!characterId) return [];
+            const filterCandidates = [
+                `id=${characterId}`,
+                `character_id=${characterId}`,
+                `characterId=${characterId}`
+            ];
+
+            for (const filter of filterCandidates) {
+                try {
+                    const response = await algoliaClient.search([{
+                        indexName: INDEX_NAME,
+                        params: {
+                            query: '',
+                            filters: filter,
+                            hitsPerPage: MAX_CHUNKS_PER_ENTRY,
+                        }
+                    }]);
+                    const hits = response.results?.[0]?.hits || [];
+                    if (hits.length > 0) {
+                        return hits.sort((a, b) => extractChunkNumber(a) - extractChunkNumber(b));
+                    }
+                } catch (error) {
+                    console.error('Error fetching chunks by filter:', filter, error);
+                }
+            }
+
+            // Fallback: sequentially fetch chunks via objectID pattern
+            const index = algoliaClient.initIndex(INDEX_NAME);
+            const sequential = [];
+            let foundAny = false;
+
+            for (let chunk = 0; chunk <= MAX_CHUNKS_PER_ENTRY; chunk++) {
+                const targetId = buildObjectIdFromParts(characterId, chunk);
+                try {
+                    const obj = await index.getObject(targetId);
+                    sequential.push(obj);
+                    foundAny = true;
+                } catch (error) {
+                    if (foundAny) {
+                        // Stop once we've reached the end of contiguous chunks
+                        break;
+                    } else {
+                        // Before finding any chunk, skip missing numbers and keep searching
+                        continue;
+                    }
+                }
+            }
+
+            if (sequential.length === 0 && initialHit) {
+                return [initialHit];
+            }
+
+            return sequential;
+        };
+
+        const ReaderView = ({ initialHit, onClose }) => {
+            const ZOOM_LEVELS = [24, 28, 32, 36, 42];
+            const [zoomIndex, setZoomIndex] = useState(1);
+            const [currentHit, setCurrentHit] = useState(initialHit);
+            const [loading, setLoading] = useState(false);
+            const [allChunks, setAllChunks] = useState([initialHit]); // Initialize with initialHit
+            const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
+            const [highlightIndex, setHighlightIndex] = useState(null);
+
+            const contentRef = useRef(null);
+
+            // Read query param
+            const queryParams = new URLSearchParams(window.location.search);
+            const searchTerm = queryParams.get('q');
+
+            const highlightReactText = (text, query) => {
+                if (!query || !text) return text;
+                const terms = query.split(/\s+/).filter(t => t.length > 2);
+                if (!terms.length) return text;
+
+                const pattern = `(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`;
+                // Use a check regex to verify if part matches any term
+                const checkRegex = new RegExp(pattern, 'i');
+                const splitRegex = new RegExp(pattern, 'gi');
+
+                return text.split(splitRegex).map((part, i) => {
+                    if (checkRegex.test(part)) {
+                        return <span key={i} className="highlight-red" style={{ color: '#dc2626', fontWeight: 'bold' }}>{part}</span>;
+                    }
+                    return part;
+                });
+            };
+
+            // Fetch all chunks for this character on mount
+            useEffect(() => {
+                const fetchAllChunks = async () => {
+                    if (!initialHit) return;
+
+                    // Show initial content immediately
+                    setCurrentHit(initialHit);
+
+                    // Then fetch all chunks in background
+                    try {
+                        const characterId = extractCharacterId(initialHit);
+                        const chunks = await fetchChunksForCharacter(characterId, initialHit);
+                        if (chunks.length > 0) {
+                            const startIndex = chunks.findIndex(c => extractChunkNumber(c) === 1);
+                            const safeStart = startIndex >= 0 ? startIndex : 0;
+                            const highlight = chunks.findIndex(c => c.objectID === initialHit.objectID);
+                            setAllChunks(chunks);
+                            setHighlightIndex(highlight >= 0 ? highlight : safeStart);
+                            setCurrentChunkIndex(safeStart);
+                            setCurrentHit(chunks[safeStart]);
+                        } else {
+                            setAllChunks([initialHit]);
+                            setHighlightIndex(0);
+                            setCurrentChunkIndex(0);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching chunks:', error);
+                        setAllChunks([initialHit]);
+                        setHighlightIndex(0);
+                        setCurrentChunkIndex(0);
+                    }
+                };
+
+                fetchAllChunks();
+            }, [initialHit]);
+
+            const jumpToChunk = (index) => {
+                if (!allChunks[index]) return;
+                setCurrentChunkIndex(index);
+                setCurrentHit(allChunks[index]);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleZoom = () => {
+                setZoomIndex((prev) => (prev + 1) % ZOOM_LEVELS.length);
+            };
+
+            const goToNext = async () => {
+                if (currentChunkIndex < allChunks.length - 1) {
+                    const nextIndex = currentChunkIndex + 1;
+                    jumpToChunk(nextIndex);
+                } else {
+                    // At the end of loaded chunks, try to load next chunk
+                    const currentIdStr = extractCharacterId(currentHit);
+                    if (!currentIdStr) return;
+                    const currentId = parseInt(currentIdStr, 10);
+                    const currentChunk = extractChunkNumber(currentHit);
+                    const nextChunk = currentChunk + 1;
+                    const nextObjectID = `${currentId}_${nextChunk}`;
+
+                    setLoading(true);
+                    try {
+                        const nextHit = await algoliaClient.initIndex(INDEX_NAME).getObject(nextObjectID);
+                        const updated = [...allChunks, nextHit];
+                        setAllChunks(updated);
+                        jumpToChunk(updated.length - 1);
+                    } catch (error) {
+                        // Current character ended, try next character (id + 1, chunk 1)
+                        const nextId = currentId + 1;
+                        const nextCharObjectID = `${nextId}_1`;
+                        try {
+                            const nextCharHit = await algoliaClient.initIndex(INDEX_NAME).getObject(nextCharObjectID);
+                            const newChunks = await fetchChunksForCharacter(String(nextId));
+                            const resolvedChunks = newChunks.length > 0 ? newChunks : [nextCharHit];
+                            setAllChunks(resolvedChunks);
+                            setHighlightIndex(0);
+                            setCurrentChunkIndex(0);
+                            setCurrentHit(resolvedChunks[0]);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        } catch (err) {
+                            // End of content - do nothing
+                        }
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            };
+
+            const goToPrev = async () => {
+                if (currentChunkIndex > 0) {
+                    const prevIndex = currentChunkIndex - 1;
+                    jumpToChunk(prevIndex);
+                } else {
+                    // At the first chunk in allChunks array
+                    const currentIdStr = extractCharacterId(currentHit);
+                    if (!currentIdStr) return;
+                    const currentId = parseInt(currentIdStr, 10);
+                    const currentChunk = extractChunkNumber(currentHit);
+
+                    if (currentChunk === 1) {
+                        // At chunk 1, try to load previous character
+                        const prevId = currentId - 1;
+                        if (prevId < 1) {
+                            // Already at the very first character - do nothing
+                            return;
+                        }
+
+                        setLoading(true);
+                        try {
+                            // Search for all chunks of the previous character
+                            const prevChunks = await fetchChunksForCharacter(String(prevId));
+                            if (prevChunks.length > 0) {
+                                setAllChunks(prevChunks);
+                                setHighlightIndex(0);
+                                jumpToChunk(prevChunks.length - 1);
+                            }
+                        } catch (error) {
+                            // Previous character not found - do nothing
+                        } finally {
+                            setLoading(false);
+                        }
+                    } else {
+                        // We're at a chunk > 1, try to load previous chunk
+                        const prevChunk = currentChunk - 1;
+                        const prevObjectID = `${currentId}_${prevChunk}`;
+                        setLoading(true);
+                        try {
+                            const prevHit = await algoliaClient.initIndex(INDEX_NAME).getObject(prevObjectID);
+                            setAllChunks([prevHit, ...allChunks]);
+                            setHighlightIndex((prev) => (prev !== null ? prev + 1 : null));
+                            jumpToChunk(0);
+                        } catch (error) {
+                            // Previous chunk doesn't exist - do nothing
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            };
+
+
+
+            const formattedText = useMemo(() => {
+                if (!currentHit) return null;
+                const chunkNumber = extractChunkNumber(currentHit);
+                const parts = [];
+
+                if (chunkNumber === 1 && currentHit.full_intro) {
+                    parts.push(currentHit.full_intro.trim());
+                }
+                if (currentHit.text_content) {
+                    parts.push(currentHit.text_content.trim());
+                } else if (currentHit.text) {
+                    parts.push(currentHit.text.trim());
+                }
+
+                const rawText = parts.filter(Boolean).join('\n\n');
+                if (!rawText) return null;
+
+                const lines = rawText
+                    .replace(/\|\|/g, '\n')
+                    .replace(/\.(?=\s|$)/g, '.\n')
+                    .split('\n');
+
+                return (
+                    <div className="text-justify">
+                        {lines.map((line, index) => {
+                            const trimmedLine = line.trim();
+                            if (!trimmedLine) return null;
+                            return <p key={index} className="mb-4 block">{highlightReactText(trimmedLine, searchTerm)}</p>;
+                        })}
+                    </div>
+                );
+            }, [currentHit]);
+
+            if (!currentHit) return null;
+
+            return (
+                <div className="fixed inset-0 z-50 bg-bg-color overflow-y-auto animate-fade-in">
+                    <div className="reader-container relative flex flex-col">
+
+                        {/* Header */}
+                        <div className="article-header">
+                            <h2 className="article-title">{currentHit.name || currentHit.book_title}</h2>
+                            <div className="meta-bar">
+                                {currentHit && allChunks.length > 0 && (
+                                    <div className="meta-item">
+                                        <span className="meta-label">مقطع:</span>
+                                        <span className="meta-value">{extractChunkNumber(currentHit)} من {allChunks.length}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Text Content */}
+                        <div className="flex-grow" ref={contentRef}>
+                            {loading && (
+                                <div className="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center">
+                                    <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            )}
+                            <div className="article-text transition-all duration-300" style={{ fontSize: `${ZOOM_LEVELS[zoomIndex]}px` }}>
+                                {formattedText}
+                            </div>
+                        </div>
+
+                        {/* Footer Navigation */}
+                        <div className="p-12 text-center border-t border-border-color mt-12">
+                            <button onClick={goToNext} className="text-secondary-text hover:text-accent transition-colors flex items-center justify-center gap-2 mx-auto font-bold">
+                                <span>اضغط للانتقال للصفحة التالية</span>
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Floating Action Buttons */}
+                    <div className="fab-container">
+                        <button onClick={handleZoom} className="fab primary" title="تكبير الخط">
+                            <ZoomIn className="w-6 h-6" />
+                        </button>
+                        <button onClick={onClose} className="fab" title="العودة لنتائج البحث">
+                            <ArrowRight className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    {/* Side Navigation */}
+                    <button onClick={goToNext} className="fixed top-1/2 left-6 -translate-y-1/2 z-50 w-12 h-12 bg-white/90 backdrop-blur rounded-full shadow-lg border border-slate-200 text-slate-700 hover:text-accent hover:scale-110 transition-all flex items-center justify-center">
+                        <ChevronLeft className="w-8 h-8" />
+                    </button>
+                    <button onClick={goToPrev} className="fixed top-1/2 right-6 -translate-y-1/2 z-50 w-12 h-12 bg-white/90 backdrop-blur rounded-full shadow-lg border border-slate-200 text-slate-700 hover:text-accent hover:scale-110 transition-all flex items-center justify-center">
+                        <ChevronRight className="w-8 h-8" />
+                    </button>
+
+                </div>
+            );
+        };
+
+        const AppContent = () => {
+            const { query } = useSearchBox();
+            const [selectedHit, setSelectedHit] = useState(null);
+            const [hasSearched, setHasSearched] = useState(false);
+            const { hits } = useHits();
+
+            // Deep Linking Logic
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                const id = params.get('id');
+                if (id) {
+                    // Fetch specific object
+                    algoliaClient.initIndex(INDEX_NAME).getObject(id)
+                        .then(obj => {
+                            setSelectedHit(obj);
+                        })
+                        .catch(err => {
+                            console.error("Error fetching object:", err);
+                            // Fallback or alert
+                        });
+                }
+            }, []);
+
+            useEffect(() => {
+                if (query && query.trim() !== '') {
+                    setHasSearched(true);
+                }
+            }, [query]);
+
+            const handleRead = (hit) => {
+                setSelectedHit(hit);
+                // Update URL without reloading
+                const url = new URL(window.location);
+                url.searchParams.set('id', hit.objectID);
+                window.history.pushState({}, '', url);
+            };
+
+            const handleCloseReader = () => {
+                setSelectedHit(null);
+                const url = new URL(window.location);
+                url.searchParams.delete('id');
+                window.history.pushState({}, '', url);
+            };
+
+            // Filter duplicates
+            const uniqueHits = useMemo(() => {
+                const seen = new Set();
+                return hits.filter(hit => {
+                    const key = hit.objectID; // Use objectID for uniqueness
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+            }, [hits]);
+
+            return (
+                <div>
+                    {/* Always render Search Box unless reading */}
+                    <div className={selectedHit !== null ? 'hidden' : 'block'}>
+                        <div className="mb-8">
+                            <CustomSearchBox />
+                            {hasSearched && <Stats />}
+                            <BookFilter />
+                        </div>
+
+                        {!hasSearched ? (
+                            <div className="py-20 text-center text-gray-500">
+                                <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                                <p className="text-xl mb-2 font-serif">مرحباً بك في سير الأعلام</p>
+                                <p className="text-sm">اكتب كلمة البحث في الصندوق أعلاه للبدء في استكشاف آلاف الصفحات.</p>
+                            </div>
+                        ) : uniqueHits.length === 0 ? (
+                            <div className="py-8 text-center text-gray-600 bg-gray-50 rounded-lg">
+                                <p className="font-bold mb-1">لم يتم العثور على نتائج.</p>
+                                <p className="text-sm">جرب كلمات مختلفة أو تأكد من الإملاء.</p>
+                            </div>
+                        ) : (
+                            <div className="hits-list">
+                                {uniqueHits.map((hit) => (
+                                    <HitCard key={hit.objectID} hit={hit} onClick={() => handleRead(hit)} />
+                                ))}
+                            </div>
+                        )}
+
+                        {hasSearched && (
+                            <div className="mt-10 border-t pt-6 flex justify-center">
+                                <CustomPagination />
+                            </div>
+                        )}
+                    </div>
+
+                    {selectedHit !== null && (
+                        <ReaderView
+                            initialHit={selectedHit}
+                            onClose={handleCloseReader}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // --- Main Layout ---
+
+        const App = () => {
+            return (
+                <div className="container-fluid">
+                    <header className="text-center">
+                        <div className="flex items-center justify-center gap-3">
+                            <Globe className="w-8 h-8 text-blue-600" />
+                            <h1>الموسوعة التاريخية</h1>
+                            <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">v3.0</span>
+                        </div>
+                    </header>
+
+                    <main>
+                        <InstantSearch
+                            searchClient={searchClient}
+                            indexName={INDEX_NAME}
+                            future={{ preserveSharedStateOnUnmount: true }}
+                        >
+                            <Configure
+                                hitsPerPage={10}
+                                attributesToSnippet={['full_intro:100', 'text:100', 'text_content:100']}
+                                snippetEllipsisText="..."
+                                advancedSyntax={true}
+                                facets={['name', 'book_title']}
+                                maxValuesPerFacet={20}
+                            />
+                            <AppContent />
+                        </InstantSearch>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>

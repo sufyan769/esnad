@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>موسوعة البيان - الرئيسية</title>
+  <meta name="description"
+    content="محرك بحث موحد يجمع الحديث الشريف، الفتاوى، التراجم، التاريخ وقواعد البيانات الإسلامية في واجهة واحدة.">
+  <meta name="keywords"
+    content="حديث شريف, فتاوى, تراجم العلماء, سير الأعلام, موسوعة إسلامية, بحث شرعي, اسلام ويب, الدرر السنية">
+  <link rel="canonical" href="https://sufyan769.github.io/-bayan/" />
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="الموسوعة الشاملة - بحث إسلامي موحد">
+  <meta property="og:description"
+    content="ابحث في مئات الأحاديث والفتاوى والتراجم عبر محرك واحد سريع يعتمد على Algolia وFirebase.">
+  <meta property="og:url" content="https://sufyan769.github.io/-bayan/">
+  <meta property="og:locale" content="ar_AR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="الموسوعة الشاملة">
+  <meta name="twitter:description"
+    content="واجهة واحدة للبحث في الحديث الشريف، الفتاوى، التاريخ، تراجم العلماء وقاعدة Firebase.">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "الموسوعة الشاملة",
+      "url": "https://sufyan769.github.io/-bayan/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://sufyan769.github.io/-bayan/index.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Unified Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i data-lucide="library"></i>
+        <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">البيان</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html?tab=hadith" class="nav-link" data-nav-tab="hadith">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+
+        <a href="index.html?tab=scholars" class="nav-link" data-nav-tab="scholars">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="index.html?tab=history" class="nav-link" data-nav-tab="history">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          سير الأعلام
+        </a>
+        <a href="index.html?tab=jarh" class="nav-link" data-nav-tab="jarh">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          الجرح والتعديل
+        </a>
+        <a href="index.html?tab=fatawa" class="nav-link" data-nav-tab="fatawa">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="index.html?tab=firebase" class="nav-link" data-nav-tab="firebase">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="simple-shell">
+    <section class="search-stack search-stack--compact">
+      <div class="search-tabs">
+        <button class="search-tab active" data-target="all">الكل</button>
+        <button class="search-tab" data-target="hadith">الحديث</button>
+        <button class="search-tab" data-target="scholars">التراجم</button>
+        <button class="search-tab" data-target="history">سير الأعلام</button>
+        <button class="search-tab" data-target="jarh">الجرح والتعديل</button>
+        <button class="search-tab" data-target="fatawa">الفتاوى</button>
+        <button class="search-tab" data-target="firebase">Firebase</button>
+      </div>
+
+      <form id="searchForm" class="search-input-wrapper search-input-wrapper--full">
+        <button type="submit" class="search-btn">
+          <i data-lucide="search" class="w-6 h-6"></i>
+        </button>
+        <input id="searchInput" type="text" class="search-input"
+          placeholder="ابحث في الموسوعة (مثلاً: البخاري، ابن تيمية، الزكاة)..." autocomplete="off">
+      </form>
+    </section>
+
+    <section class="results-panel results-panel--tight">
+      <div id="loadingState" class="hidden state-card">
+        <div class="spinner"></div>
+        <p>جاري البحث في المصادر...</p>
+      </div>
+
+      <div id="noResultsState" class="hidden state-card">
+        <i data-lucide="search-x"></i>
+        <div>
+          <h3>لم يتم العثور على نتائج</h3>
+          <p>حاول استخدام كلمات مختلفة أو تأكد من الإملاء.</p>
+        </div>
+      </div>
+
+      <div id="resultsList" class="results-list hidden"></div>
+    </section>
+
+    <section class="curated-grid">
+      <div class="curated-section">
+        <header>
+          <h3>فتاوى مختارة</h3>
+          <a href="algolia-search.html">عرض الكل</a>
+        </header>
+        <div id="featuredFatwas" class="curated-list">
+          <p class="curated-empty">جاري تحميل الفتاوى...</p>
+        </div>
+      </div>
+
+      <div class="curated-section">
+        <header>
+          <h3>مختارات من التراجم</h3>
+          <a href="index.html?tab=scholars">عرض الكل</a>
+        </header>
+        <div id="featuredScholars" class="curated-list">
+          <p class="curated-empty">جاري تحميل التراجم...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <!-- Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
+
+    const CONFIG = {
+      hadith: {
+        appId: '88G4AVERCC',
+        apiKey: '76402a5d814264e01fb86ca687d26e30',
+        indexName: 'firebase-hadeth',
+        firebaseCollection: 'hadiths'
+      },
+      history: {
+        appId: '88G4AVERCC',
+        apiKey: '33b0b484f534b2ae2dac948d588345a6',
+        indexName: 'algolia_unified'
+      },
+      scholars: {
+        appId: '3XD12I7386',
+        apiKey: '981ea91e88c65be8aadf2113c207b9c5',
+        indexName: 'trajum'
+      },
+      fatawa: {
+        appId: '3XD12I7386',
+        apiKey: '89e8e132a05fdb02275f64dec8d14d05',
+        indexName: 'alfatawa'
+      },
+      firebase: {
+        apiKey: "AIzaSyBYJ2pVoWJ5ednWOnnF2dOJ43MJvDi_8rw",
+        authDomain: "hadeth-7baf7.firebaseapp.com",
+        projectId: "hadeth-7baf7",
+        storageBucket: "hadeth-7baf7.firebasestorage.app",
+        messagingSenderId: "401684715520",
+        appId: "1:401684715520:web:297abdb6aee1fb3176a0e5"
+      },
+      scholarFirebase: {
+        apiKey: "AIzaSyBni4eUpBlMrBVr-I-_bTLDyYpdJgkBnpw",
+        authDomain: "islsm-9.firebaseapp.com",
+        projectId: "islsm-9",
+        storageBucket: "islsm-9.firebasestorage.app",
+        messagingSenderId: "940034885206",
+        appId: "1:940034885206:web:4013d7a5297f2ff7b41df7"
+      },
+      jarhFirebase: {
+        apiKey: "AIzaSyBjkJ45NsQgz1c7V1mUsnrORMYx8WceDdQ",
+        authDomain: "trajum-almaktaba.firebaseapp.com",
+        projectId: "trajum-almaktaba",
+        storageBucket: "trajum-almaktaba.firebasestorage.app",
+        messagingSenderId: "589922811454",
+        appId: "1:589922811454:web:b038cd26b4f02048cadb6f"
+      }
+    };
+
+    const PLACEHOLDER_DOMAIN = 'https://your-site.com';
+    const FATWA_PAGE = 'fatwa.html';
+
+    const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
+    const truncateText = (text = '', length = 220) => text.length > length ? `${text.substring(0, length)}...` : text;
+    const buildFatwaDetailUrl = (id) => id ? `${FATWA_PAGE}?id=${encodeURIComponent(id)}` : '#';
+
+    const app = initializeApp(CONFIG.firebase);
+    const db = getFirestore(app);
+    const scholarApp = initializeApp(CONFIG.scholarFirebase, "scholarApp");
+    const scholarDb = getFirestore(scholarApp);
+    const jarhApp = initializeApp(CONFIG.jarhFirebase, "jarhApp");
+    const jarhDb = getFirestore(jarhApp);
+
+    const clients = {
+      hadith: algoliasearch(CONFIG.hadith.appId, CONFIG.hadith.apiKey).initIndex(CONFIG.hadith.indexName),
+      history: algoliasearch(CONFIG.history.appId, CONFIG.history.apiKey).initIndex(CONFIG.history.indexName),
+      scholars: algoliasearch(CONFIG.scholars.appId, CONFIG.scholars.apiKey).initIndex(CONFIG.scholars.indexName),
+      fatawa: algoliasearch(CONFIG.fatawa.appId, CONFIG.fatawa.apiKey).initIndex(CONFIG.fatawa.indexName)
+    };
+
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const searchTabs = document.querySelectorAll('.search-tab');
+    const resultsList = document.getElementById('resultsList');
+    const loadingState = document.getElementById('loadingState');
+    const noResultsState = document.getElementById('noResultsState');
+    const featuredFatwasEl = document.getElementById('featuredFatwas');
+    const featuredScholarsEl = document.getElementById('featuredScholars');
+
+    const PLACEHOLDERS = {
+      all: "ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)...",
+      hadith: "ابحث في الأحاديث (مثلاً: إنما الأعمال بالنيات)...",
+      history: "ابحث في سير الأعلام (مثلاً: معركة بدر)...",
+      scholars: "ابحث عن عالم (مثلاً: ابن تيمية)...",
+      jarh: "ابحث في الجرح والتعديل (مثلاً: يحيى بن معين)...",
+      fatawa: "ابحث عن فتوى (مثلاً: زكاة الشركات)...",
+      firebase: "ابحث في قاعدة التراجم المخصصة..."
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramTab = urlParams.get('tab');
+    const paramQuery = urlParams.get('q') || '';
+
+    let currentTab = PLACEHOLDERS[paramTab] ? paramTab : 'all';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      const cachedResults = sessionStorage.getItem('lastSearchResults');
+      const cachedTerm = sessionStorage.getItem('lastSearchTerm');
+      const cachedTab = sessionStorage.getItem('lastActiveTab');
+
+      if (!paramTab && cachedTab && PLACEHOLDERS[cachedTab]) {
+        currentTab = cachedTab;
+      }
+      setActiveTab(currentTab, { skipURLSync: true });
+
+      if (paramQuery) {
+        searchInput.value = paramQuery;
+        handleSearch(paramQuery, { skipURLSync: true });
+        loadCuratedSections();
+        return;
+      }
+
+      if (cachedResults && cachedTerm) {
+        searchInput.value = cachedTerm;
+        if (cachedTab) {
+          setActiveTab(cachedTab);
+        }
+
+        try {
+          const results = JSON.parse(cachedResults);
+          if (results.length > 0) {
+            loadingState.classList.add('hidden');
+            noResultsState.classList.add('hidden');
+            resultsList.classList.remove('hidden');
+            renderResults(results);
+          }
+        } catch (e) {
+          console.error("Error parsing saved results:", e);
+          sessionStorage.removeItem('lastSearchResults');
+        }
+      }
+      loadCuratedSections();
+    });
+
+    const navTabLinks = document.querySelectorAll('[data-nav-tab]');
+    navTabLinks.forEach(link => {
+      link.addEventListener('click', (event) => {
+        const targetTab = link.dataset.navTab;
+        if (!targetTab) return;
+        event.preventDefault();
+        const currentTerm = searchInput.value.trim();
+        setActiveTab(targetTab, { skipURLSync: true });
+        if (currentTerm) {
+          handleSearch(currentTerm);
+        } else {
+          searchInput.value = '';
+          syncURLParams(targetTab, '');
+          resultsList.classList.add('hidden');
+          noResultsState.classList.add('hidden');
+          loadingState.classList.add('hidden');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    function setActiveTab(tab, { skipURLSync } = {}) {
+      searchTabs.forEach(t => t.classList.remove('active'));
+      const button = Array.from(searchTabs).find(btn => btn.dataset.target === tab);
+      if (button) button.classList.add('active');
+      currentTab = tab;
+      searchInput.placeholder = PLACEHOLDERS[tab] || PLACEHOLDERS.all;
+      if (!skipURLSync) {
+        syncURLParams(tab);
+      }
+    }
+
+    function syncURLParams(tabValue = currentTab, termValue = searchInput.value.trim()) {
+      const url = new URL(window.location);
+      if (tabValue && tabValue !== 'all') {
+        url.searchParams.set('tab', tabValue);
+      } else {
+        url.searchParams.delete('tab');
+      }
+      if (termValue) {
+        url.searchParams.set('q', termValue);
+      } else {
+        url.searchParams.delete('q');
+      }
+      window.history.replaceState({}, '', url);
+    }
+
+    searchTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        setActiveTab(tab.dataset.target);
+        if (searchInput.value.trim()) {
+          handleSearch(searchInput.value.trim());
+        } else {
+          syncURLParams();
+        }
+      });
+    });
+
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const term = searchInput.value.trim();
+      if (term) handleSearch(term);
+    });
+
+    async function handleSearch(term, { skipURLSync } = {}) {
+      resultsList.innerHTML = '';
+      resultsList.classList.add('hidden');
+      noResultsState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      if (!skipURLSync) {
+        syncURLParams(currentTab, term);
+      }
+
+      try {
+        let results = [];
+
+        if (currentTab === 'all') {
+          const [hadithRes, historyRes, scholarsRes, fatawaRes, firebaseDocs] = await Promise.all([
+            clients.hadith.search(term, { hitsPerPage: 5 }),
+            clients.history.search(term, { hitsPerPage: 5 }),
+            clients.scholars.search(term, { hitsPerPage: 5 }),
+            clients.fatawa.search(term, { hitsPerPage: 5 }),
+            searchFirebaseDocs(term, 5)
+          ]);
+
+          const hydratedHadith = await hydrateHadithResults(hadithRes.hits);
+          results = [
+            ...formatResults(hydratedHadith, 'hadith'),
+            ...formatResults(scholarsRes.hits, 'scholars'),
+            ...formatResults(historyRes.hits, 'history'),
+            ...formatResults(fatawaRes.hits, 'fatawa'),
+            ...formatResults(firebaseDocs, 'firebase'),
+            ...formatResults(await searchJarhDocs(term, 5), 'jarh')
+          ];
+        } else if (currentTab === 'firebase') {
+          const docs = await searchFirebaseDocs(term, 20);
+          results = formatResults(docs, 'firebase');
+        } else if (currentTab === 'jarh') {
+          const docs = await searchJarhDocs(term, 20);
+          results = formatResults(docs, 'jarh');
+        } else {
+          const client = clients[currentTab];
+          if (!client) throw new Error('Client غير موجود');
+          const res = await client.search(term, { hitsPerPage: 20 });
+          let hits = res.hits;
+          if (currentTab === 'hadith') {
+            hits = await hydrateHadithResults(hits);
+          }
+          results = formatResults(hits, currentTab);
+        }
+
+        loadingState.classList.add('hidden');
+
+        if (results.length === 0) {
+          noResultsState.classList.remove('hidden');
+          sessionStorage.setItem('lastSearchResults', JSON.stringify([]));
+        } else {
+          resultsList.classList.remove('hidden');
+          renderResults(results);
+          sessionStorage.setItem('lastSearchTerm', term);
+          sessionStorage.setItem('lastActiveTab', currentTab);
+          sessionStorage.setItem('lastSearchResults', JSON.stringify(results));
+        }
+
+      } catch (error) {
+        console.error("Search Error:", error);
+        loadingState.classList.add('hidden');
+        resultsList.innerHTML = `<p class="text-center text-red-500">حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى.</p>`;
+        resultsList.classList.remove('hidden');
+      }
+    }
+
+    async function hydrateHadithResults(hits) {
+      const promises = hits.map(async (hit) => {
+        try {
+          const docRef = doc(db, CONFIG.hadith.firebaseCollection, hit.objectID);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            return { ...hit, ...docSnap.data() };
+          }
+          return hit;
+        } catch (e) {
+          console.error("Error hydrating hadith:", hit.objectID, e);
+          return hit;
+        }
+      });
+      return Promise.all(promises);
+    }
+
+    function formatResults(hits, type) {
+      const term = searchInput.value.trim();
+
+      const getHighlighted = (hit, attr, fallback) => {
+        if (hit._highlightResult && hit._highlightResult[attr] && hit._highlightResult[attr].value) {
+          return hit._highlightResult[attr].value;
+        }
+        if (hit._snippetResult && hit._snippetResult[attr] && hit._snippetResult[attr].value) {
+          return hit._snippetResult[attr].value;
+        }
+        return highlightText(fallback || '', term);
+      };
+
+      const highlightText = (text, query) => {
+        if (!query || !text) return text;
+        const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${safeQuery})`, 'gi');
+        return text.replace(regex, '<span class="highlight-red">$1</span>');
+      };
+
+      return hits.map(hit => {
+        let title = '';
+        let snippet = '';
+        let link = '#';
+        let meta = '';
+
+        if (type === 'hadith') {
+          // Show hadith text as the main content (title)
+          title = getHighlighted(hit, 'text', hit.text || "حديث شريف");
+
+          // Build metadata snippet instead of repeating hadith text
+          const rawi = hit.rawi ? (Array.isArray(hit.rawi) ? hit.rawi.join(', ') : hit.rawi) : '';
+          const muhaddith = hit.muhaddith || '';
+          const source = hit.source ? (Array.isArray(hit.source) ? hit.source.join(', ') : hit.source) : '';
+          const pageNum = hit.page_or_number || '';
+
+          let hukmText = '';
+          let hukmColor = '#6b7280'; // default gray
+          if (hit.hukm) {
+            const h = Array.isArray(hit.hukm) ? hit.hukm[0] : hit.hukm;
+            hukmText = h;
+
+            // Assign specific colors for each hukm
+            if (h.includes('صحيح')) {
+              hukmColor = '#16a34a'; // green for sahih
+            } else if (h.includes('حسن')) {
+              hukmColor = '#2563eb'; // blue for hasan
+            } else if (h.includes('ضعيف')) {
+              hukmColor = '#ea580c'; // orange for da'eef
+            } else if (h.includes('موضوع')) {
+              hukmColor = '#dc2626'; // red for mawdoo
+            }
+          }
+
+          // Create metadata snippet with colors
+          const metaParts = [];
+          if (rawi) metaParts.push(`<strong style="color: #8d6e63;">الراوي:</strong> <span style="color: #8d6e63;">${rawi}</span>`);
+          if (hukmText) metaParts.push(`<strong style="color: ${hukmColor};">الحكم:</strong> <span style="color: ${hukmColor}; font-weight: bold;">${hukmText}</span>`);
+          if (muhaddith) metaParts.push(`<strong style="color: #8d6e63;">المحدث:</strong> <span style="color: #8d6e63;">${muhaddith}</span>`);
+          if (source) metaParts.push(`<strong style="color: #8d6e63;">المصدر:</strong> <span style="color: #8d6e63;">${source}</span>`);
+          if (pageNum) metaParts.push(`<strong style="color: #8d6e63;">رقم/صفحة:</strong> <span style="color: #8d6e63;">${pageNum}</span>`);
+
+          snippet = metaParts.length > 0 ? metaParts.join(' • ') : '';
+          link = `details_hadith.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
+          meta = `<span class="badge badge-info">حديث</span>`;
+        } else if (type === 'scholars') {
+          title = getHighlighted(hit, 'name', hit.name || "بطاقة تراجم");
+          snippet = getHighlighted(hit, 'trj', hit.trj ? hit.trj.substring(0, 200) + "..." : "");
+          const docId = hit.objectID || hit.id;
+          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
+          meta = `<span class="badge badge-info">تراجم</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
+        } else if (type === 'history') {
+          title = getHighlighted(hit, 'name', hit.name || "بدون عنوان");
+          const content = hit.full_intro || hit.text || "";
+          snippet = getHighlighted(hit, 'full_intro', content.substring(0, 200) + "...");
+          link = `history.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
+          meta = `<span class="badge badge-warning">سير الأعلام</span>`;
+        } else if (type === 'fatawa') {
+          const fatwaId = hit.objectID || hit.id || '';
+          title = getHighlighted(hit, 'question', stripPlaceholderDomain(hit.question || "فتوى"));
+          const answerPreview = stripPlaceholderDomain(hit.answer_snippet || hit.answer || hit.text || "لا يوجد نص للجواب.");
+          snippet = getHighlighted(hit, 'answer', truncateText(answerPreview, 220));
+          link = buildFatwaDetailUrl(fatwaId) + `&q=${encodeURIComponent(term)}`;
+          meta = `<span class="badge badge-info">فتوى</span> ${hit.source ? hit.source.replace('.html', '') : ''}`;
+        } else if (type === 'firebase') {
+          title = highlightText(hit.name || "سيرة معرفية", term);
+          const content = hit.trj || hit.summary || "";
+          snippet = highlightText(content.substring(0, 220) + "...", term);
+          const docId = hit.id || hit.objectID;
+          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
+          meta = `<span class="badge badge-success">قاعدة Firebase</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
+        } else if (type === 'jarh') {
+          title = highlightText(hit['الاسم'] || "راوي بدون اسم", term);
+          snippet = `رتبة ابن حجر: ${hit['الرتبة عند ابن حجر'] || '-'} | رتبة الذهبي: ${hit['الرتبة عند الذهبي'] || '-'}`;
+          link = `details_jarh.html?id=${hit.id || hit.objectID}&q=${encodeURIComponent(term)}`;
+          meta = `<span class="badge badge-warning">الجرح والتعديل</span>`;
+        }
+
+        return { type, title, snippet, link, meta, raw: hit };
+      });
+    }
+
+    function formatParagraphHTML(text) {
+      if (!text) return '';
+      // Join single newlines as spaces, preserve double newlines as paragraph breaks
+      // And also start a new line after .
+      const processedText = text.trim()
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{2,}/g, '|||')
+        .replace(/\n/g, ' ')
+        .replace(/([.])\s*/g, '$1|||')
+        .split('|||')
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      return processedText.map(p => `<p>${p}</p>`).join('');
+    }
+
+    function renderResults(results) {
+      resultsList.innerHTML = '';
+      results.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+
+        let extraButtonsHtml = '';
+        let extraContentHtml = '';
+
+        if (item.type === 'hadith' && item.raw) {
+          const sharhId = `res-sharh-${index}`;
+          const osoulId = `res-osoul-${index}`;
+
+          if (item.raw.sharh || item.raw.osoul) {
+            extraButtonsHtml = `
+              <div class="mt-4 flex gap-2 flex-wrap">
+                ${item.raw.sharh ? `
+                  <button class="btn btn-secondary btn-xs flex items-center gap-2" 
+                          data-toggle="${sharhId}" data-label="الشرح"
+                          style="font-size: 0.85rem; background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;">
+                    <i data-lucide="book-open" class="w-4 h-4 text-blue-600"></i>
+                    <span class="font-bold">عرض الشرح</span>
+                  </button>` : ''}
+                ${item.raw.osoul ? `
+                  <button class="btn btn-secondary btn-xs flex items-center gap-2" 
+                          data-toggle="${osoulId}" data-label="الأصول"
+                          style="font-size: 0.85rem; background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;">
+                    <i data-lucide="scroll" class="w-4 h-4 text-amber-600"></i>
+                    <span class="font-bold">عرض الأصول</span>
+                  </button>` : ''}
+              </div>
+            `;
+
+            extraContentHtml = `
+              ${item.raw.sharh ? `<div class="similar-extra hidden" id="${sharhId}" style="margin-top: 15px; padding: 15px; border-top: 1px dashed #e2e8f0; font-family: 'Amiri', serif; font-size: 1.2rem; line-height: 1.6;">${formatParagraphHTML(item.raw.sharh)}</div>` : ''}
+              ${item.raw.osoul ? `<div class="similar-extra hidden" id="${osoulId}" style="margin-top: 15px; padding: 15px; border-top: 1px dashed #e2e8f0; font-family: 'Amiri', serif; font-size: 1.2rem; line-height: 1.6;">${formatParagraphHTML(item.raw.osoul)}</div>` : ''}
+            `;
+          }
+        }
+
+        div.innerHTML = `
+          <div class="result-meta">${item.meta}</div>
+          <h3 class="result-title">
+            <a href="${item.link}">${item.title}</a>
+          </h3>
+          <div class="result-snippet">${item.snippet}</div>
+          ${extraButtonsHtml}
+          ${extraContentHtml}
+        `;
+
+        // Add toggle listeners
+        div.querySelectorAll('[data-toggle]').forEach(btn => {
+          const label = btn.getAttribute('data-label');
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = btn.getAttribute('data-toggle');
+            const target = div.querySelector(`#${targetId}`);
+            if (target) {
+              const isHidden = target.classList.toggle('hidden');
+              btn.querySelector('span').textContent = isHidden ? `عرض ${label}` : `إخفاء ${label}`;
+            }
+          });
+        });
+
+        resultsList.appendChild(div);
+      });
+      // Re-initialize lucide icons for the new buttons
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    async function searchFirebaseDocs(term, size = 10) {
+      if (!term) return [];
+      const trimmed = term.trim();
+      const colRef = collection(scholarDb, "scholars_biographies");
+      let snapshot = await getDocs(query(colRef, where("aliases", "array-contains", trimmed), limit(size)));
+
+      if (snapshot.empty && trimmed.includes(' ')) {
+        const fallback = trimmed.split(' ')[0];
+        if (fallback.length >= 3) {
+          snapshot = await getDocs(query(colRef, where("aliases", "array-contains", fallback), limit(size)));
+        }
+      }
+
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async function searchJarhDocs(term, size = 10) {
+      if (!term) return [];
+      const trimmed = term.trim();
+      const colRef = collection(jarhDb, "scholars"); // Collection name changed to 'scholars'
+      let snapshot = await getDocs(query(colRef, where("الاسم", ">=", trimmed), where("الاسم", "<=", trimmed + '\uf8ff'), limit(size)));
+
+      // Fallback for numeric ID
+      if (snapshot.empty && !isNaN(trimmed)) {
+        const numSnap = await getDocs(query(colRef, where("id", "==", Number(trimmed)), limit(1)));
+        return numSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    function normalizeResultUrl(url) {
+      if (!url) return '';
+      try {
+        const parsed = new URL(url, window.location.origin);
+        if (parsed.hostname.includes('your-site.com')) {
+          return parsed.pathname + parsed.search + parsed.hash;
+        }
+        return url;
+      } catch {
+        return url;
+      }
+    }
+
+    const renderCuratedPlaceholder = (el, message) => {
+      if (!el) return;
+      el.innerHTML = `<p class="curated-empty">${message}</p>`;
+    };
+
+    async function loadCuratedSections() {
+      if (!featuredFatwasEl || !featuredScholarsEl) return;
+      renderCuratedPlaceholder(featuredFatwasEl, 'جاري تحميل الفتاوى...');
+      renderCuratedPlaceholder(featuredScholarsEl, 'جاري تحميل التراجم...');
+
+      // Random page between 0 and 50 to show different results
+      const randomPageFatwa = Math.floor(Math.random() * 50);
+      const randomPageScholar = Math.floor(Math.random() * 50);
+
+      try {
+        const [fatwaRes, scholarRes] = await Promise.all([
+          clients.fatawa.search('', {
+            hitsPerPage: 5,
+            page: randomPageFatwa,
+            attributesToRetrieve: ['question', 'source', 'objectID', 'id']
+          }),
+          clients.scholars.search('', {
+            hitsPerPage: 5,
+            page: randomPageScholar,
+            attributesToRetrieve: ['name', 'death', 'trj', 'objectID', 'id']
+          })
+        ]);
+        renderCuratedFatwas(fatwaRes.hits || []);
+        renderCuratedScholars(scholarRes.hits || []);
+      } catch (error) {
+        console.error('Curated sections error:', error);
+        renderCuratedPlaceholder(featuredFatwasEl, 'تعذر تحميل الفتاوى المختارة.');
+        renderCuratedPlaceholder(featuredScholarsEl, 'تعذر تحميل التراجم المختارة.');
+      }
+    }
+
+    function renderCuratedFatwas(hits) {
+      if (!hits.length) {
+        renderCuratedPlaceholder(featuredFatwasEl, 'لا توجد فتاوى متاحة الآن.');
+        return;
+      }
+      featuredFatwasEl.innerHTML = '';
+      hits.forEach(hit => {
+        const id = hit.objectID || hit.id || '';
+        const question = stripPlaceholderDomain(hit.question || 'سؤال بدون عنوان');
+        const item = document.createElement('a');
+        item.href = buildFatwaDetailUrl(id);
+        item.className = 'curated-item';
+        item.innerHTML = `
+          <p class="curated-item-title">${question}</p>
+          <p class="curated-item-meta">${hit.source ? hit.source.replace('.html', '') : ''}</p>
+        `;
+        featuredFatwasEl.appendChild(item);
+      });
+    }
+
+    function renderCuratedScholars(hits) {
+      if (!hits.length) {
+        renderCuratedPlaceholder(featuredScholarsEl, 'لا توجد تراجم متاحة الآن.');
+        return;
+      }
+      featuredScholarsEl.innerHTML = '';
+      hits.forEach(hit => {
+        const docId = hit.objectID || hit.id || '';
+        const name = hit.name || 'سيرة معرفية';
+        const excerpt = stripPlaceholderDomain(truncateText(hit.trj || '', 150));
+        const meta = hit.death ? `توفي سنة ${hit.death}` : '';
+        const item = document.createElement('a');
+        item.href = `details_scholars.html?id=${docId}`;
+        item.className = 'curated-item';
+        item.innerHTML = `
+          <p class="curated-item-title">${name}</p>
+          <p class="curated-item-meta">${excerpt || meta}</p>
+        `;
+        featuredScholarsEl.appendChild(item);
+      });
+    }
+
+  </script>
+</body>
+
+</html>

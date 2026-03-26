@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفاصيل الراوي - موسوعة البيان</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .scholar-quote {
+            border-right: 4px solid var(--accent-color);
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-right-width: 4px;
+        }
+
+        .scholar-name {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: block;
+            font-family: 'Amiri', serif;
+            font-size: 1.2rem;
+        }
+
+        .quote-text {
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .dynamic-source {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            direction: ltr;
+            text-align: left;
+            margin-top: 6px;
+            font-family: sans-serif;
+        }
+
+        /* Utility classes to replace Tailwind */
+        .text-primary {
+            color: var(--primary-color);
+        }
+
+        .text-accent {
+            color: var(--accent-color);
+        }
+
+        .text-red-500 {
+            color: var(--danger-color);
+        }
+
+        .text-gray-500 {
+            color: var(--secondary-text);
+        }
+
+        .text-blue-700 {
+            color: #1d4ed8;
+        }
+
+        .text-green-700 {
+            color: #15803d;
+        }
+
+        .text-gray-700 {
+            color: #374151;
+        }
+
+        .text-gray-800 {
+            color: #1f2937;
+        }
+
+        .bg-gray-50 {
+            background-color: #f9fafb;
+        }
+
+        .font-serif {
+            font-family: 'Amiri', serif;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .mt-8 {
+            margin-top: 2rem;
+        }
+
+        .mt-10 {
+            margin-top: 2.5rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .pb-2 {
+            padding-bottom: 0.5rem;
+        }
+
+        .pt-6 {
+            padding-top: 1.5rem;
+        }
+
+        .border-b {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .border-t {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .rounded {
+            border-radius: 0.375rem;
+        }
+
+        .last\:border-0:last-child {
+            border: none;
+        }
+    </style>
+</head>
+
+<body class="reader-body">
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i data-lucide="library"></i>
+                <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
+                        class="brand-accent">البيان</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html?tab=hadith" class="nav-link">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    الحديث الشريف
+                </a>
+                <a href="index.html?tab=scholars" class="nav-link">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    تراجم العلماء
+                </a>
+                <a href="history.html" class="nav-link">
+                    <i data-lucide="scroll" class="w-4 h-4"></i>
+                    سير الأعلام
+                </a>
+                <a href="index.html?tab=jarh" class="nav-link active">
+                    <i data-lucide="scale" class="w-4 h-4"></i>
+                    الجرح والتعديل
+                </a>
+                <a href="algolia-search.html" class="nav-link">
+                    <i data-lucide="book" class="w-4 h-4"></i>
+                    موسوعة الفتاوى
+                </a>
+                <a href="firebase-search.html" class="nav-link">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    بحث Firebase
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div
+        style="padding: 10px 0; background: #f8f9fa; border-bottom: 1px solid var(--border-color); position: sticky; top: 60px; z-index: 40;">
+        <div class="container-fluid flex justify-between items-center">
+            <button onclick="window.location.href='index.html?tab=jarh'"
+                class="flex items-center gap-2 text-gray-500 hover:text-[#00538b] transition-colors text-sm font-bold bg-transparent border-none cursor-pointer">
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <span>العودة للبحث</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="flex items-center justify-center h-screen">
+        <div class="w-10 h-10 border-4 border-[#00538b] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <div id="viewContainer" class="reader-container hidden">
+        <div class="article-header">
+            <h1 id="viewTitle" class="article-title text-center"></h1>
+            <div id="metaBar" class="meta-bar"></div>
+        </div>
+
+        <div id="viewContent">
+            <!-- Content will be injected here -->
+        </div>
+    </div>
+
+    <div class="fab-container reader-fabs print:hidden">
+        <button id="increaseFont" class="fab primary" title="تكبير النص">
+            <i data-lucide="zoom-in" class="w-5 h-5"></i>
+        </button>
+        <button id="decreaseFont" class="fab" title="تصغير النص">
+            <i data-lucide="zoom-out" class="w-5 h-5"></i>
+        </button>
+        <button id="backToResults" class="fab" title="العودة لنتائج البحث">
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjkJ45NsQgz1c7V1mUsnrORMYx8WceDdQ",
+            authDomain: "trajum-almaktaba.firebaseapp.com",
+            projectId: "trajum-almaktaba",
+            storageBucket: "trajum-almaktaba.firebasestorage.app",
+            messagingSenderId: "589922811454",
+            appId: "1:589922811454:web:b038cd26b4f02048cadb6f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const COLLECTION_NAME = 'scholars';
+
+        const params = new URLSearchParams(window.location.search);
+        const docId = params.get("id");
+
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const viewContainer = document.getElementById('viewContainer');
+        const viewTitle = document.getElementById('viewTitle');
+        const metaBar = document.getElementById('metaBar');
+        const viewContent = document.getElementById('viewContent');
+
+        let currentData = null;
+        let currentFontSize = 18; // Default font size for body text
+
+        lucide.createIcons();
+
+        function updateFontSize() {
+            const elements = viewContent.querySelectorAll('p, .quote-text');
+            elements.forEach(el => {
+                el.style.fontSize = `${currentFontSize}px`;
+                el.style.lineHeight = 1.8;
+            });
+        }
+        document.getElementById('increaseFont').addEventListener('click', () => { if (currentFontSize < 32) { currentFontSize += 2; updateFontSize(); } });
+        document.getElementById('decreaseFont').addEventListener('click', () => { if (currentFontSize > 14) { currentFontSize -= 2; updateFontSize(); } });
+        document.getElementById('backToResults').addEventListener('click', () => {
+            if (document.referrer && document.referrer.includes('index.html')) {
+                history.back();
+            } else {
+                window.location.href = 'index.html?tab=jarh';
+            }
+        });
+
+        async function loadData() {
+            if (!docId) {
+                loadingSpinner.innerHTML = "<p class='text-red-500'>رقم الراوي مفقود</p>";
+                return;
+            }
+
+            try {
+                const docRef = doc(db, COLLECTION_NAME, docId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = { id: docSnap.id, ...docSnap.data() };
+                    currentData = data;
+                    renderView(data);
+                    loadingSpinner.classList.add('hidden');
+                    viewContainer.classList.remove('hidden');
+                    updateFontSize(); // Apply initial font size
+                } else {
+                    loadingSpinner.innerHTML = "<p class='text-red-500'>الراوي غير موجود</p>";
+                }
+            } catch (e) {
+                console.error(e);
+                loadingSpinner.innerHTML = "<p class='text-red-500'>حدث خطأ في الاتصال بقاعدة البيانات</p>";
+            }
+        }
+
+        function renderView(data) {
+            viewTitle.textContent = data['الاسم'] || 'راوي بدون اسم';
+            metaBar.innerHTML = '';
+            viewContent.innerHTML = '';
+
+            // 1. Basic Metadata
+            addMetaItem('الكنية', data['الكنية']);
+            addMetaItem('النسب', data['النسب']);
+            addMetaItem('الإقامة', data['بلد الإقامة']);
+            addMetaItem('الوفاة', data['تاريخ الوفاة']);
+            addMetaItem('الطبقة', data['طبقة رواة التقريب']);
+
+            // Ranks (Special Highlighting)
+            if (data['الرتبة عند ابن حجر']) {
+                addMetaItem('ابن حجر', data['الرتبة عند ابن حجر'], 'text-blue-700');
+            }
+            if (data['الرتبة عند الذهبي']) {
+                addMetaItem('الذهبي', data['الرتبة عند الذهبي'], 'text-green-700');
+            }
+
+            // 2. Al-Jarh wal-Ta'deel Section
+            const jarhSection = document.createElement('div');
+            jarhSection.className = 'mt-8';
+            jarhSection.innerHTML = `<h3 class="text-2xl font-bold font-serif text-primary mb-6 border-b pb-2">أقوال الجرح والتعديل</h3>`;
+
+            const jarhList = data['الجرح والتعديل'] || [];
+            if (Array.isArray(jarhList) && jarhList.length > 0) {
+                for (let i = 0; i < jarhList.length; i += 2) {
+                    const scholar = jarhList[i];
+                    const statement = jarhList[i + 1];
+                    if (!scholar) continue;
+
+                    const div = document.createElement('div');
+                    div.className = "scholar-quote";
+                    div.innerHTML = `
+                        <span class="scholar-name">${scholar}</span>
+                        <p class="quote-text">${statement || '(بدون نص)'}</p>
+                    `;
+                    jarhSection.appendChild(div);
+                }
+            } else {
+                jarhSection.innerHTML += `<p class="text-gray-500 italic">لا توجد أقوال مسجلة.</p>`;
+            }
+            viewContent.appendChild(jarhSection);
+
+            // 3. Dynamic Fields (Other Sayings)
+            const standardFields = [
+                'id', 'الاسم', 'الكنية', 'النسب', 'بلد الإقامة', 'تاريخ الوفاة',
+                'طبقة رواة التقريب', 'علاقات الراوي', 'الرتبة عند ابن حجر', 'الرتبة عند الذهبي',
+                'الجرح والتعديل'
+            ];
+
+            let hasDynamic = false;
+            const dynamicSection = document.createElement('div');
+            dynamicSection.className = 'mt-10 pt-6 border-t border-gray-200';
+            dynamicSection.innerHTML = `<h3 class="text-xl font-bold font-serif text-primary mb-4">مصادر وأقوال أخرى</h3>`;
+
+            for (const [key, value] of Object.entries(data)) {
+                if (!standardFields.includes(key) && typeof value === 'string') {
+                    hasDynamic = true;
+                    const div = document.createElement('div');
+                    div.className = "mb-4 pb-2 border-b border-gray-100 last:border-0";
+                    div.innerHTML = `
+                        <p class="quote-text font-medium text-lg text-gray-800">"${key}"</p>
+                        <p class="dynamic-source">المصدر: ${value}</p>
+                    `;
+                    dynamicSection.appendChild(div);
+                }
+            }
+
+            if (hasDynamic) {
+                viewContent.appendChild(dynamicSection);
+            }
+
+            // Relations Section (if exists and hasn't been added to meta)
+            if (data['علاقات الراوي']) {
+                const relSection = document.createElement('div');
+                relSection.className = 'mt-8 p-4 bg-gray-50 rounded';
+                relSection.innerHTML = `<h4 class="font-bold mb-2">علاقات الراوي</h4><p class="text-gray-700">${data['علاقات الراوي']}</p>`;
+                viewContent.appendChild(relSection);
+            }
+
+            lucide.createIcons();
+        }
+
+        function addMetaItem(label, value, valueClass = '') {
+            if (!value) return;
+            const div = document.createElement('div');
+            div.className = 'meta-item';
+            div.innerHTML = `<span class="meta-label">${label}:</span> <span class="meta-value ${valueClass}">${value}</span>`;
+            metaBar.appendChild(div);
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>
