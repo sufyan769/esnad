@@ -1,68 +1,79 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+
+export const revalidate = 3600; // Cache page for 1 hour
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBYJ2pVoWJ5ednWOnnF2dOJ43MJvDi_8rw",
+  projectId: "hadeth-7baf7",
+};
+
+// Initialize Firebase once
+const app = getApps().length > 0 ? getApp('hadithApp') : initializeApp(firebaseConfig, 'hadithApp');
+const db = getFirestore(app);
+
+async function fetchHadith(id) {
+  try {
+    const snap = await getDoc(doc(db, 'hadiths', id));
+    if (snap.exists()) return snap.data();
+    return null;
+  } catch (error) {
+    console.error("Firebase fetch error:", error);
+    return null;
+  }
+}
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
-  const url = `https://firestore.googleapis.com/v1/projects/hadeth-7baf7/databases/(default)/documents/hadiths/${id}`;
+  const data = await fetchHadith(id);
   
-  try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
-    if (!res.ok) return { title: 'حديث غير موجود' };
-    const json = await res.json();
+  if (data) {
+    const text = data.text || 'نص الحديث غير متوفر';
+    const safeTitle = text.replace(/(<([^>]+)>)/gi, "").substring(0, 60) + ' | موسوعة الحديث';
+    const safeDesc = text.replace(/(<([^>]+)>)/gi, "").substring(0, 160);
     
-    if (json.fields) {
-      const text = json.fields.text?.stringValue || 'نص الحديث غير متوفر';
-      const safeTitle = text.replace(/(<([^>]+)>)/gi, "").substring(0, 60) + ' | موسوعة الحديث';
-      const safeDesc = text.replace(/(<([^>]+)>)/gi, "").substring(0, 160);
-      
-      return {
+    return {
+      title: safeTitle,
+      description: safeDesc,
+      openGraph: {
         title: safeTitle,
         description: safeDesc,
-        openGraph: {
-          title: safeTitle,
-          description: safeDesc,
-          type: 'article',
-        },
-      };
-    }
-  } catch(e) {
-    return { title: 'موسوعة الحديث' };
+        type: 'article',
+      },
+    };
   }
+  
+  return { title: 'موسوعة الحديث' };
 }
 
 export default async function HadithPage({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
-  const url = `https://firestore.googleapis.com/v1/projects/hadeth-7baf7/databases/(default)/documents/hadiths/${id}`;
+  const data = await fetchHadith(id);
   
-  const res = await fetch(url, { next: { revalidate: 3600 } });
-  if (!res.ok) notFound();
-  
-  const json = await res.json();
-  if (!json.fields) notFound();
+  if (!data) notFound();
 
   // Extract fields
-  const text = json.fields.text?.stringValue || 'نص الحديث غير متوفر';
-  const sharh = json.fields.sharh?.stringValue || '';
-  const osoul = json.fields.osoul?.stringValue || '';
-  const takhrij = json.fields.takhrij?.stringValue || '';
+  const text = data.text || 'نص الحديث غير متوفر';
+  const sharh = data.sharh || '';
+  const osoul = data.osoul || '';
+  const takhrij = data.takhrij || '';
   
   // Extract arrays or strings for metadata
   const getFieldVal = (field) => {
     if (!field) return '';
-    if (field.stringValue) return field.stringValue;
-    if (field.arrayValue && field.arrayValue.values) {
-      return field.arrayValue.values.map(v => v.stringValue).join('، ');
-    }
-    return '';
+    if (Array.isArray(field)) return field.join('، ');
+    return String(field);
   };
   
-  const source = getFieldVal(json.fields.source);
-  const hukm = getFieldVal(json.fields.hukm);
-  const rawi = getFieldVal(json.fields.rawi);
-  const muhaddith = getFieldVal(json.fields.muhaddith);
-  const page_or_number = getFieldVal(json.fields.page_or_number);
+  const source = getFieldVal(data.source);
+  const hukm = getFieldVal(data.hukm);
+  const rawi = getFieldVal(data.rawi);
+  const muhaddith = getFieldVal(data.muhaddith);
+  const page_or_number = getFieldVal(data.page_or_number);
 
   // Formatting paragraphs
   const formatParagraphs = (str) => {
