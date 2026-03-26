@@ -173,22 +173,22 @@ export default async function HadithPage({ params }) {
         </div>
       </section>
 
-      {/* Removing inline styles causing the shrink, using the CSS class natively */}
-      <div className="reader-container" style={{ marginTop: '40px', marginBottom: '80px' }}>
+      {/* Using max-width 1100px to utilize empty space, adding generous 80px padding */}
+      <div className="reader-container" style={{ maxWidth: '1100px', width: '92%', padding: '80px', marginTop: '40px', marginBottom: '80px' }}>
         
         {/* Hadith Core Text */}
-        <header className="article-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h1 style={{ fontFamily: "'Amiri', serif", fontSize: '2.2rem', lineHeight: '1.8', color: '#011e1f', marginBottom: '20px' }} 
+        <header className="article-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <h1 style={{ fontFamily: "'Amiri', serif", fontSize: '2.4rem', lineHeight: '2.0', color: '#011e1f', marginBottom: '30px' }} 
               dangerouslySetInnerHTML={{ __html: formattedText }} />
         </header>
 
         {/* Smart Topics / الدلالات الموضوعية */}
         {topics.length > 0 && (
-          <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 'bold', color: '#64748b' }}>الدلالات الموضوعية:</span>
+          <div style={{ marginBottom: '40px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 'bold', color: '#64748b', fontSize: '1.1rem' }}>الدلالات الموضوعية:</span>
             {topics.map(topic => (
               <Link key={topic} href={`/?tab=all&q=${encodeURIComponent(topic)}`} 
-                    style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '4px 12px', borderRadius: '16px', fontSize: '0.9rem', textDecoration: 'none', fontWeight: 'bold', transition: 'background 0.2s' }}>
+                    style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '6px 16px', borderRadius: '16px', fontSize: '1rem', textDecoration: 'none', fontWeight: 'bold', transition: 'background 0.2s' }}>
                 # {topic}
               </Link>
             ))}
@@ -196,8 +196,8 @@ export default async function HadithPage({ params }) {
         )}
 
         {/* Metadata Beige Box */}
-        <div style={{ backgroundColor: '#fcfaf5', padding: '30px', borderRadius: '12px', border: '1px solid #f0e6d2', marginBottom: '40px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+        <div style={{ backgroundColor: '#fcfaf5', padding: '40px', borderRadius: '16px', border: '1px solid #f0e6d2', marginBottom: '60px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
             {source && <div><strong style={{ color: '#8d6e63' }}>المصدر:</strong> <span style={{ color: '#011e1f', fontWeight: 'bold' }}>{source}</span></div>}
             {rawi && <div><strong style={{ color: '#8d6e63' }}>الراوي:</strong> <span style={{ color: '#011e1f', fontWeight: 'bold' }}>{rawi}</span></div>}
             {muhaddith && <div><strong style={{ color: '#8d6e63' }}>المحدث:</strong> <span style={{ color: '#011e1f', fontWeight: 'bold' }}>{muhaddith}</span></div>}
