@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import algoliasearch from "algoliasearch";
+import { SearchIcon, BookOpen, ScrollText } from 'lucide-react';
 
 export const revalidate = 3600; // Cache page for 1 hour
 
@@ -13,6 +15,13 @@ const firebaseConfig = {
 // Initialize Firebase once
 const app = getApps().length > 0 ? getApp('hadithApp') : initializeApp(firebaseConfig, 'hadithApp');
 const db = getFirestore(app);
+
+// Initialize Algolia Clients
+const hadithAlgoliaClient = algoliasearch('88G4AVERCC', '76402a5d814264e01fb86ca687d26e30');
+const hadithIndex = hadithAlgoliaClient.initIndex('firebase-hadeth');
+
+const fatawaAlgoliaClient = algoliasearch('3XD12I7386', '89e8e132a05fdb02275f64dec8d14d05');
+const fatawaIndex = fatawaAlgoliaClient.initIndex('alfatawa');
 
 async function fetchHadith(id) {
   try {
@@ -49,6 +58,31 @@ export async function generateMetadata({ params }) {
   return { title: 'موسوعة الحديث' };
 }
 
+// Simple Arabic Stopwords for Keyword Extraction
+const STOP_WORDS = new Set([
+  'في', 'من', 'على', 'إلى', 'عن', 'بين', 'قال', 'قالت', 'يقول', 'أن', 'إن', 'كان', 'كانت',
+  'الله', 'رسول', 'صلى', 'عليه', 'وسلم', 'رضي', 'عنه', 'عنها', 'ابن', 'أبي', 'عبد',
+  'الذي', 'التي', 'اللذين', 'هو', 'هي', 'هم', 'ما', 'لا', 'لم', 'لن', 'أو', 'أم'
+]);
+
+// Extract unique meaningful topics from text
+function extractTopics(text) {
+  const clean = text.replace(/(<([^>]+)>)/gi, " ").replace(/[^\u0600-\u06FF\s]/g, '');
+  const words = clean.split(/\s+/);
+  const freq = {};
+  
+  words.forEach(w => {
+    if (w.length > 3 && !STOP_WORDS.has(w)) {
+      freq[w] = (freq[w] || 0) + 1;
+    }
+  });
+
+  // Sort by frequency, then length
+  return Object.keys(freq)
+    .sort((a, b) => freq[b] - freq[a] || b.length - a.length)
+    .slice(0, 5); // Return top 5 keywords
+}
+
 export default async function HadithPage({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
@@ -62,6 +96,26 @@ export default async function HadithPage({ params }) {
   const osoul = data.osoul || '';
   const takhrij = data.takhrij || '';
   
+  // Topics & Algolia Queries
+  const topics = extractTopics(text);
+  const semanticQuery = topics.join(" ");
+  
+  let similarHadiths = [];
+  let relatedFatawa = [];
+  
+  if (semanticQuery) {
+    try {
+      const [hadithRes, fatawaRes] = await Promise.all([
+        hadithIndex.search(semanticQuery, { hitsPerPage: 4, similarQuery: semanticQuery }),
+        fatawaIndex.search(semanticQuery, { hitsPerPage: 3 })
+      ]);
+      similarHadiths = hadithRes.hits.filter(h => h.objectID !== id); // Exclude current hadith
+      relatedFatawa = fatawaRes.hits;
+    } catch (e) {
+      console.error("Algolia semantic search error:", e);
+    }
+  }
+
   // Extract arrays or strings for metadata
   const getFieldVal = (field) => {
     if (!field) return '';
@@ -95,59 +149,167 @@ export default async function HadithPage({ params }) {
   const formattedOsoul = formatParagraphs(osoul);
 
   return (
-    <div className="reader-body" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <nav className="main-nav" style={{ padding: '20px 0', borderBottom: '1px solid #e2e8f0', backgroundColor: '#fff' }}>
-        <div className="nav-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between' }}>
-          <Link href="/" className="nav-logo" style={{ textDecoration: 'none', fontWeight: 'bold', fontSize: '1.25rem', color: '#1a202c' }}>
-            <span className="brand-mark"><span className="brand-slate" style={{ color: '#4a5568' }}>موسوعة</span> <span className="brand-accent" style={{ color: '#00538b' }}>البيان</span></span>
+    <div className="reader-body">
+      <nav className="main-nav">
+        <div className="nav-container">
+          <Link href="/" className="nav-logo">
+            <span className="brand-mark">
+              <span className="brand-slate">موسوعة</span> <span className="brand-accent">البيان</span>
+            </span>
           </Link>
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <Link href="/" style={{ color: '#4a5568', textDecoration: 'none' }}>الرئيسية</Link>
-            <Link href="/?tab=hadith" style={{ color: '#00538b', textDecoration: 'none', fontWeight: 'bold' }}>حديث</Link>
-            <Link href="/?tab=fatawa" style={{ color: '#4a5568', textDecoration: 'none' }}>الفتاوى</Link>
+          <div className="nav-links">
+            <Link href="/" className="nav-link">الرئيسية</Link>
+            <Link href="/?tab=hadith" className="nav-link active">الحديث الشريف</Link>
+            <Link href="/?tab=fatawa" className="nav-link">الفتاوى</Link>
           </div>
         </div>
       </nav>
 
-      <section className="reader-toolbar" style={{ padding: '15px 0', backgroundColor: '#f8f9fa', borderBottom: '1px solid #e2e8f0' }}>
-        <div className="nav-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-          <Link href="/?tab=hadith" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#00538b', textDecoration: 'none', fontWeight: 'bold' }}>
-            <span>&rarr; العودة لنتائج الأحاديث</span>
+      <section className="reader-toolbar">
+        <div className="nav-container">
+          <Link href="/?tab=hadith" className="reader-return">
+            &rarr; العودة لنتائج الأحاديث
           </Link>
         </div>
       </section>
 
-      <div className="reader-container" style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px', flex: '1' }}>
-        <header style={{ marginBottom: '30px' }}>
-          <div style={{ fontSize: '28px', lineHeight: '1.6', fontWeight: 'bold', color: '#1a202c', marginBottom: '20px' }} dangerouslySetInnerHTML={{ __html: formattedText }} />
+      {/* Removing inline styles causing the shrink, using the CSS class natively */}
+      <div className="reader-container" style={{ marginTop: '40px', marginBottom: '80px' }}>
+        
+        {/* Hadith Core Text */}
+        <header className="article-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <h1 style={{ fontFamily: "'Amiri', serif", fontSize: '2.2rem', lineHeight: '1.8', color: '#011e1f', marginBottom: '20px' }} 
+              dangerouslySetInnerHTML={{ __html: formattedText }} />
         </header>
 
-        <div style={{ backgroundColor: '#f8fafc', padding: '24px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
-          {source && <div style={{ marginBottom: '8px' }}><strong style={{ color: '#4a5568' }}>المصدر:</strong> <span style={{ color: '#92400e' }}>{source}</span></div>}
-          {hukm && <div style={{ marginBottom: '8px' }}><strong style={{ color: '#4a5568' }}>الحكم:</strong> <span style={{ color: hukm.includes('صحيح') ? '#15803d' : '#b91c1c' }}>{hukm}</span></div>}
-          {rawi && <div style={{ marginBottom: '8px' }}><strong style={{ color: '#4a5568' }}>الراوي:</strong> <span style={{ color: '#92400e' }}>{rawi}</span></div>}
-          {muhaddith && <div style={{ marginBottom: '8px' }}><strong style={{ color: '#4a5568' }}>المحدث:</strong> <span style={{ color: '#92400e' }}>{muhaddith}</span></div>}
-          {page_or_number && <div style={{ marginBottom: '8px' }}><strong style={{ color: '#4a5568' }}>رقم/صفحة:</strong> <span style={{ color: '#64748b', fontFamily: 'monospace' }}>{page_or_number}</span></div>}
-          {takhrij && <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
-            <h4 style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '8px', fontSize: '0.875rem' }}>التخريج:</h4>
-            <p style={{ color: '#475569', fontSize: '0.875rem', lineHeight: '1.6' }}>{takhrij}</p>
+        {/* Smart Topics / الدلالات الموضوعية */}
+        {topics.length > 0 && (
+          <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 'bold', color: '#64748b' }}>الدلالات الموضوعية:</span>
+            {topics.map(topic => (
+              <Link key={topic} href={`/?tab=all&q=${encodeURIComponent(topic)}`} 
+                    style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '4px 12px', borderRadius: '16px', fontSize: '0.9rem', textDecoration: 'none', fontWeight: 'bold', transition: 'background 0.2s' }}>
+                # {topic}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Metadata Beige Box */}
+        <div style={{ backgroundColor: '#fcfaf5', padding: '30px', borderRadius: '12px', border: '1px solid #f0e6d2', marginBottom: '40px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+            {source && <div><strong style={{ color: '#8d6e63' }}>المصدر:</strong> <span style={{ color: '#011e1f', fontWeight: 'bold' }}>{source}</span></div>}
+            {rawi && <div><strong style={{ color: '#8d6e63' }}>الراوي:</strong> <span style={{ color: '#011e1f', fontWeight: 'bold' }}>{rawi}</span></div>}
+            {muhaddith && <div><strong style={{ color: '#8d6e63' }}>المحدث:</strong> <span style={{ color: '#011e1f', fontWeight: 'bold' }}>{muhaddith}</span></div>}
+            {page_or_number && <div><strong style={{ color: '#8d6e63' }}>رقم/صفحة:</strong> <span style={{ color: '#011e1f', fontFamily: 'monospace' }}>{page_or_number}</span></div>}
+            {hukm && <div>
+              <strong style={{ color: '#8d6e63' }}>الحكم:</strong> 
+              <span style={{ 
+                color: hukm.includes('صحيح') || hukm.includes('حسن') ? '#15803d' : '#b91c1c', 
+                fontWeight: 'bold', padding: '2px 8px', backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: '4px', marginLeft: '6px'
+              }}>{hukm}</span>
+            </div>}
+          </div>
+          
+          {/* Takhrij section inside metadata */}
+          {takhrij && <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f0e6d2' }}>
+            <h4 style={{ fontWeight: 'bold', color: '#8d6e63', marginBottom: '8px', fontSize: '0.95rem' }}>بيانات التخريج:</h4>
+            <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.7' }}>{takhrij}</p>
           </div>}
         </div>
 
+        {/* Sharh */}
         {sharh && (
-          <div style={{ marginBottom: '40px' }}>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a202c', marginBottom: '20px', paddingBottom: '10px', borderBottom: '2px solid #00538b' }}>الشرح</h3>
-            <div style={{ fontSize: '1.4rem', lineHeight: '1.8', color: '#4a5568' }} dangerouslySetInnerHTML={{ __html: formattedSharh }} />
+          <div style={{ marginBottom: '40px', padding: '30px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#027d8d', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <BookOpen size={24} /> الشرح والتوضيح
+            </h3>
+            <div style={{ fontFamily: "'Amiri', serif", fontSize: '1.3rem', lineHeight: '2.0', color: '#1a202c' }} dangerouslySetInnerHTML={{ __html: formattedSharh }} />
           </div>
         )}
 
+        {/* Osoul */}
         {osoul && (
-          <div style={{ marginBottom: '40px' }}>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a202c', marginBottom: '20px', paddingBottom: '10px', borderBottom: '2px solid #00538b' }}>الأصول</h3>
-            <div style={{ fontSize: '1.4rem', lineHeight: '1.8', color: '#4a5568' }} dangerouslySetInnerHTML={{ __html: formattedOsoul }} />
+          <div style={{ marginBottom: '40px', padding: '30px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ea580c', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <ScrollText size={24} /> الأصول والأحكام
+            </h3>
+            <div style={{ fontFamily: "'Amiri', serif", fontSize: '1.3rem', lineHeight: '2.0', color: '#1a202c' }} dangerouslySetInnerHTML={{ __html: formattedOsoul }} />
           </div>
         )}
+        
+        {/* Semantic Features Section: Similar Hadith & Related Fatawa */}
+        {(similarHadiths.length > 0 || relatedFatawa.length > 0) && (
+          <div style={{ borderTop: '2px dashed #cbd5e1', paddingTop: '40px', marginTop: '40px' }}>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', fontFamily: "'Amiri', serif", marginBottom: '30px', color: '#0f172a', textAlign: 'center' }}>
+              إضافات معرفية ذات صلة
+            </h2>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+              
+              {/* Similar Hadiths */}
+              {similarHadiths.length > 0 && (
+                <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#027d8d', fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '20px' }}>
+                    <SearchIcon size={20} /> أحاديث مشابهة
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {similarHadiths.map(hit => (
+                      <Link key={hit.objectID} href={`/hadith/${hit.objectID}`} 
+                            style={{ display: 'block', textDecoration: 'none', background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'border 0.2s, box-shadow 0.2s' }}
+                            onMouseOver={(e) => {e.currentTarget.style.borderColor = '#027d8d'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}}
+                            onMouseOut={(e) => {e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'}}>
+                        <p style={{ color: '#334155', fontSize: '1.05rem', lineHeight: '1.6', margin: '0 0 8px 0', fontFamily: "'Amiri', serif" }}>
+                          {hit.text ? hit.text.substring(0, 100) + '...' : 'نص الحديث'}
+                        </p>
+                        <div style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', gap: '8px' }}>
+                          <span>الراوي: {Array.isArray(hit.rawi) ? hit.rawi[0] : hit.rawi}</span> • 
+                          <span style={{ color: hit.hukm && hit.hukm.includes('صحيح') ? '#16a34a' : 'inherit' }}>{Array.isArray(hit.hukm) ? hit.hukm[0] : hit.hukm}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Related Fatawa */}
+              {relatedFatawa.length > 0 && (
+                <div style={{ background: '#fdfaf3', padding: '24px', borderRadius: '16px', border: '1px solid #f4e6c5' }}>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#92400e', fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '20px' }}>
+                    <BookOpen size={20} /> فتاوى فقهية متعلقة
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {relatedFatawa.map(hit => (
+                      <Link key={hit.objectID} href={`/fatwa/${hit.objectID}`} 
+                            style={{ display: 'block', textDecoration: 'none', background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #f4e6c5', transition: 'border 0.2s, box-shadow 0.2s' }}
+                            onMouseOver={(e) => {e.currentTarget.style.borderColor = '#92400e'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}}
+                            onMouseOut={(e) => {e.currentTarget.style.borderColor = '#f4e6c5'; e.currentTarget.style.boxShadow = 'none'}}>
+                        <p style={{ color: '#0f172a', fontSize: '1.05rem', fontWeight: 'bold', lineHeight: '1.5', margin: '0 0 8px 0' }}>
+                          {hit.question ? hit.question.replace('https://your-site.com', '').substring(0, 90) + '...' : 'سؤال الفتوى'}
+                        </p>
+                        <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {hit.answer_snippet || hit.answer || 'الجواب...'}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <Link href={`/?tab=fatawa&q=${encodeURIComponent(semanticQuery)}`} style={{ color: '#92400e', fontSize: '0.9rem', fontWeight: 'bold', textDecoration: 'none' }}>
+                      عرض المزيد من الفتاوى &rarr;
+                    </Link>
+                  </div>
+                </div>
+              )}
+              
+            </div>
+          </div>
+        )}
+
       </div>
+      
+      <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-auto" style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 0', textAlign: 'center' }}>
+        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
+      </footer>
     </div>
   );
 }
