@@ -99,32 +99,28 @@
                 <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
                         class="brand-accent">البيان</span></span>
             </a>
-                  <div class="nav-links">
-        <a href="index.html?tab=hadith" class="nav-link">
-          <i data-lucide="book-open-check" class="w-4 h-4"></i>
-          الحديث الشريف
-        </a>
-        <a href="index.html?tab=scholars" class="nav-link">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          تراجم العلماء
-        </a>
-        <a href="index.html?tab=history" class="nav-link active">
-          <i data-lucide="scroll" class="w-4 h-4"></i>
-          سير الأعلام
-        </a>
-        <a href="index.html?tab=jarh" class="nav-link">
-          <i data-lucide="scale" class="w-4 h-4"></i>
-          الجرح والتعديل
-        </a>
-        <a href="index.html?tab=fatawa" class="nav-link">
-          <i data-lucide="book" class="w-4 h-4"></i>
-          موسوعة الفتاوى
-        </a>
-        <a href="index.html?tab=firebase" class="nav-link">
-          <i data-lucide="database" class="w-4 h-4"></i>
-          بحث Firebase
-        </a>
-      </div>
+            <div class="nav-links">
+                <a href="index.html?tab=hadith" class="nav-link">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    الحديث الشريف
+                </a>
+                <a href="index.html?tab=scholars" class="nav-link">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    تراجم العلماء
+                </a>
+                <a href="history.html" class="nav-link active">
+                    <i data-lucide="scroll" class="w-4 h-4"></i>
+                    سير الأعلام
+                </a>
+                <a href="algolia-search.html" class="nav-link">
+                    <i data-lucide="book" class="w-4 h-4"></i>
+                    موسوعة الفتاوى
+                </a>
+                <a href="firebase-search.html" class="nav-link">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    بحث Firebase
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -732,19 +728,12 @@
             // Deep Linking Logic
             useEffect(() => {
                 const params = new URLSearchParams(window.location.search);
-                let id = params.get('id');
-                if (!id) {
-                    const match = window.location.pathname.match(/\/history_([^\/]+)/i);
-                    if (match && match[1]) id = decodeURIComponent(match[1]);
-                }
+                const id = params.get('id');
                 if (id) {
                     // Fetch specific object
                     algoliaClient.initIndex(INDEX_NAME).getObject(id)
                         .then(obj => {
                             setSelectedHit(obj);
-                            import('./seo_optimizer.js').then(({ updateSEO }) => {
-                                updateSEO(obj.name || obj.book_title || 'سير الأعلام', obj.full_intro || obj.text || 'تفاصيل', window.location.href, 'Article');
-                            });
                         })
                         .catch(err => {
                             console.error("Error fetching object:", err);
@@ -765,10 +754,6 @@
                 const url = new URL(window.location);
                 url.searchParams.set('id', hit.objectID);
                 window.history.pushState({}, '', url);
-
-                import('./seo_optimizer.js').then(({ updateSEO }) => {
-                    updateSEO(hit.name || hit.book_title || 'سير الأعلام', hit.full_intro || hit.text || 'تفاصيل', window.location.href, 'Article');
-                });
             };
 
             const handleCloseReader = () => {

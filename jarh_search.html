@@ -72,32 +72,28 @@
                 <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
                         class="brand-accent">البيان</span></span>
             </a>
-                  <div class="nav-links">
-        <a href="index.html?tab=hadith" class="nav-link">
-          <i data-lucide="book-open-check" class="w-4 h-4"></i>
-          الحديث الشريف
-        </a>
-        <a href="index.html?tab=scholars" class="nav-link">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          تراجم العلماء
-        </a>
-        <a href="index.html?tab=history" class="nav-link">
-          <i data-lucide="scroll" class="w-4 h-4"></i>
-          سير الأعلام
-        </a>
-        <a href="index.html?tab=jarh" class="nav-link active">
-          <i data-lucide="scale" class="w-4 h-4"></i>
-          الجرح والتعديل
-        </a>
-        <a href="index.html?tab=fatawa" class="nav-link">
-          <i data-lucide="book" class="w-4 h-4"></i>
-          موسوعة الفتاوى
-        </a>
-        <a href="index.html?tab=firebase" class="nav-link">
-          <i data-lucide="database" class="w-4 h-4"></i>
-          بحث Firebase
-        </a>
-      </div>
+            <div class="nav-links">
+                <a href="index.html?tab=hadith" class="nav-link">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    الحديث الشريف
+                </a>
+                <a href="index.html?tab=scholars" class="nav-link">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    تراجم العلماء
+                </a>
+                <a href="history.html" class="nav-link">
+                    <i data-lucide="scroll" class="w-4 h-4"></i>
+                    سير الأعلام
+                </a>
+                <a href="jarh_search.html" class="nav-link active">
+                    <i data-lucide="scale" class="w-4 h-4"></i>
+                    الجرح والتعديل
+                </a>
+                <a href="algolia-search.html" class="nav-link">
+                    <i data-lucide="book" class="w-4 h-4"></i>
+                    موسوعة الفتاوى
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -248,7 +244,7 @@
           <div class="flex justify-between items-start">
             <div>
               <h3 class="text-xl font-bold font-serif text-blue-700 mb-2">
-                <a href="/jarh_${id}" class="hover:text-blue-800 transition-colors">${name}</a>
+                <a href="details_jarh.html?id=${id}" class="hover:text-blue-800 transition-colors">${name}</a>
               </h3>
               <div class="flex flex-wrap gap-2 text-sm text-gray-600 mb-3">
                 ${rankIbnHajar ? `<span class="meta-tag">ابن حجر: ${rankIbnHajar}</span>` : ''}
@@ -256,7 +252,7 @@
                 ${deathDate ? `<span class="meta-tag">توفي: ${deathDate}</span>` : ''}
               </div>
             </div>
-            <a href="/jarh_${id}" class="text-gray-400 hover:text-blue-600">
+            <a href="details_jarh.html?id=${id}" class="text-gray-400 hover:text-blue-600">
               <i data-lucide="chevron-left" class="w-6 h-6"></i>
             </a>
           </div>

@@ -81,7 +81,7 @@
         <i data-lucide="library"></i>
         <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">البيان</span></span>
       </a>
-            <div class="nav-links">
+      <div class="nav-links">
         <a href="index.html?tab=hadith" class="nav-link">
           <i data-lucide="book-open-check" class="w-4 h-4"></i>
           الحديث الشريف
@@ -90,19 +90,15 @@
           <i data-lucide="users" class="w-4 h-4"></i>
           تراجم العلماء
         </a>
-        <a href="index.html?tab=history" class="nav-link">
+        <a href="history.html" class="nav-link">
           <i data-lucide="scroll" class="w-4 h-4"></i>
           سير الأعلام
         </a>
-        <a href="index.html?tab=jarh" class="nav-link">
-          <i data-lucide="scale" class="w-4 h-4"></i>
-          الجرح والتعديل
-        </a>
-        <a href="index.html?tab=fatawa" class="nav-link">
+        <a href="algolia-search.html" class="nav-link">
           <i data-lucide="book" class="w-4 h-4"></i>
           موسوعة الفتاوى
         </a>
-        <a href="index.html?tab=firebase" class="nav-link active">
+        <a href="firebase-search.html" class="nav-link active">
           <i data-lucide="database" class="w-4 h-4"></i>
           بحث Firebase
         </a>
@@ -323,7 +319,7 @@
 
         div.innerHTML = `
           <h3 class="text-xl font-serif font-bold mb-2">
-            <a href="/scholar_${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] decoration-[#3366cc]">
+            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] decoration-[#3366cc]">
               ${item.name}
             </a>
           </h3>
@@ -332,7 +328,7 @@
           </p>
           <div class="mt-3 text-xs text-stone-500 flex gap-3">
             ${item.death ? `<span>(ت: ${item.death})</span>` : ''}
-            <a href="/scholar_${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] mr-auto">اقرأ المزيد &larr;</a>
+            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] mr-auto">اقرأ المزيد &larr;</a>
           </div>
         `;
         featuredGrid.appendChild(div);
@@ -400,7 +396,7 @@
 
         div.innerHTML = `
           <div class="mb-1">
-            <a href="/scholar_${doc.id}?q=${encodeURIComponent(term)}" class="text-xl text-[#3366cc] hover:text-[#2a4b8d] font-serif font-bold">
+            <a href="details_scholars.html?id=${doc.id}&q=${encodeURIComponent(term)}" class="text-xl text-[#3366cc] hover:text-[#2a4b8d] font-serif font-bold">
               ${nameHtml}
             </a>
           </div>

@@ -23,32 +23,28 @@
                 <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
                         class="brand-accent">البيان</span></span>
             </a>
-                  <div class="nav-links">
-        <a href="index.html?tab=hadith" class="nav-link">
-          <i data-lucide="book-open-check" class="w-4 h-4"></i>
-          الحديث الشريف
-        </a>
-        <a href="index.html?tab=scholars" class="nav-link active">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          تراجم العلماء
-        </a>
-        <a href="index.html?tab=history" class="nav-link">
-          <i data-lucide="scroll" class="w-4 h-4"></i>
-          سير الأعلام
-        </a>
-        <a href="index.html?tab=jarh" class="nav-link">
-          <i data-lucide="scale" class="w-4 h-4"></i>
-          الجرح والتعديل
-        </a>
-        <a href="index.html?tab=fatawa" class="nav-link">
-          <i data-lucide="book" class="w-4 h-4"></i>
-          موسوعة الفتاوى
-        </a>
-        <a href="index.html?tab=firebase" class="nav-link">
-          <i data-lucide="database" class="w-4 h-4"></i>
-          بحث Firebase
-        </a>
-      </div>
+            <div class="nav-links">
+                <a href="index.html?tab=hadith" class="nav-link">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    الحديث الشريف
+                </a>
+                <a href="index.html?tab=scholars" class="nav-link active">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    تراجم العلماء
+                </a>
+                <a href="history.html" class="nav-link">
+                    <i data-lucide="scroll" class="w-4 h-4"></i>
+                    سير الأعلام
+                </a>
+                <a href="algolia-search.html" class="nav-link">
+                    <i data-lucide="book" class="w-4 h-4"></i>
+                    موسوعة الفتاوى
+                </a>
+                <a href="firebase-search.html" class="nav-link">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    بحث Firebase
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -96,7 +92,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
-        import { updateSEO } from './seo_optimizer.js';
 
         const CONFIG = {
             firebase: {
@@ -112,11 +107,7 @@
         };
 
         const params = new URLSearchParams(window.location.search);
-        let docId = params.get("id");
-        if (!docId) {
-            const match = window.location.pathname.match(/\/scholar_([^\/]+)/i);
-            if (match && match[1]) docId = decodeURIComponent(match[1]);
-        }
+        const docId = params.get("id");
         const searchTerm = params.get("q");
 
         const app = initializeApp(CONFIG.firebase, 'scholarsApp');
@@ -233,8 +224,6 @@
             addMetaItem('الاسم الكامل', data.full);
             addMetaItem('الترتيب', data.rank);
             addMetaItem('المعرف', docId, true);
-
-            updateSEO(data.name || 'سيرة العالم', data.trj || 'معلومات عن سيرة العالم', window.location.href, 'ProfilePage');
 
             renderParagraphs(viewText, data.trj);
             updateFontSize();

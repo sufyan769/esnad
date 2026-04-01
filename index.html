@@ -11,20 +11,20 @@
     content="حديث شريف, فتاوى, تراجم العلماء, سير الأعلام, موسوعة إسلامية, بحث شرعي, اسلام ويب, الدرر السنية">
   <link rel="canonical" href="https://sufyan769.github.io/-bayan/" />
   <meta property="og:type" content="website">
-  <meta property="og:title" content="موسوعة البيان - بحث إسلامي موحد">
+  <meta property="og:title" content="الموسوعة الشاملة - بحث إسلامي موحد">
   <meta property="og:description"
     content="ابحث في مئات الأحاديث والفتاوى والتراجم عبر محرك واحد سريع يعتمد على Algolia وFirebase.">
   <meta property="og:url" content="https://sufyan769.github.io/-bayan/">
   <meta property="og:locale" content="ar_AR">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="موسوعة البيان">
+  <meta name="twitter:title" content="الموسوعة الشاملة">
   <meta name="twitter:description"
     content="واجهة واحدة للبحث في الحديث الشريف، الفتاوى، التاريخ، تراجم العلماء وقاعدة Firebase.">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "موسوعة البيان",
+      "name": "الموسوعة الشاملة",
       "url": "https://sufyan769.github.io/-bayan/",
       "potentialAction": {
         "@type": "SearchAction",
@@ -88,9 +88,6 @@
 
   <main class="simple-shell">
     <section class="search-stack search-stack--compact">
-      <div class="stack-header mb-2 text-center">
-        <h1 style="font-size: 1.8rem; font-weight: bold; color: var(--primary-color); margin: 0 auto; font-family: 'Amiri', serif;">موسوعة البيان - محرك بحث إسلامي موحد</h1>
-      </div>
       <div class="search-tabs">
         <button class="search-tab active" data-target="all">الكل</button>
         <button class="search-tab" data-target="hadith">الحديث</button>
@@ -106,7 +103,7 @@
           <i data-lucide="search" class="w-6 h-6"></i>
         </button>
         <input id="searchInput" type="text" class="search-input"
-          placeholder="ابحث في موسوعة البيان..." autocomplete="off">
+          placeholder="ابحث في الموسوعة (مثلاً: البخاري، ابن تيمية، الزكاة)..." autocomplete="off">
       </form>
     </section>
 
@@ -208,13 +205,12 @@
       }
     };
 
-    const PLACEHOLDER_DOMAIN = 'https://fatawa-seo-eanp.vercel.app';
-    const FATWA_PAGE = '/fatwa_';
+    const PLACEHOLDER_DOMAIN = 'https://your-site.com';
+    const FATWA_PAGE = 'fatwa.html';
 
     const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
-    const hasHTMLMarkup = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
     const truncateText = (text = '', length = 220) => text.length > length ? `${text.substring(0, length)}...` : text;
-    const buildFatwaDetailUrl = (id) => id ? `${FATWA_PAGE}${encodeURIComponent(id)}` : '#';
+    const buildFatwaDetailUrl = (id) => id ? `${FATWA_PAGE}?id=${encodeURIComponent(id)}` : '#';
 
     const app = initializeApp(CONFIG.firebase);
     const db = getFirestore(app);
@@ -507,19 +503,19 @@
           if (pageNum) metaParts.push(`<strong style="color: #8d6e63;">رقم/صفحة:</strong> <span style="color: #8d6e63;">${pageNum}</span>`);
 
           snippet = metaParts.length > 0 ? metaParts.join(' • ') : '';
-          link = `/hadith_${hit.objectID}?q=${encodeURIComponent(term)}`;
+          link = `details_hadith.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-info">حديث</span>`;
         } else if (type === 'scholars') {
           title = getHighlighted(hit, 'name', hit.name || "بطاقة تراجم");
           snippet = getHighlighted(hit, 'trj', hit.trj ? hit.trj.substring(0, 200) + "..." : "");
           const docId = hit.objectID || hit.id;
-          link = `/scholar_${docId}?q=${encodeURIComponent(term)}`;
+          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-info">تراجم</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         } else if (type === 'history') {
           title = getHighlighted(hit, 'name', hit.name || "بدون عنوان");
           const content = hit.full_intro || hit.text || "";
           snippet = getHighlighted(hit, 'full_intro', content.substring(0, 200) + "...");
-          link = `/history_${hit.objectID}?q=${encodeURIComponent(term)}`;
+          link = `history.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-warning">سير الأعلام</span>`;
         } else if (type === 'fatawa') {
           const fatwaId = hit.objectID || hit.id || '';
@@ -533,12 +529,12 @@
           const content = hit.trj || hit.summary || "";
           snippet = highlightText(content.substring(0, 220) + "...", term);
           const docId = hit.id || hit.objectID;
-          link = `/scholar_${docId}?q=${encodeURIComponent(term)}`;
+          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-success">قاعدة Firebase</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         } else if (type === 'jarh') {
           title = highlightText(hit['الاسم'] || "راوي بدون اسم", term);
           snippet = `رتبة ابن حجر: ${hit['الرتبة عند ابن حجر'] || '-'} | رتبة الذهبي: ${hit['الرتبة عند الذهبي'] || '-'}`;
-          link = `/jarh_${hit.id || hit.objectID}?q=${encodeURIComponent(term)}`;
+          link = `details_jarh.html?id=${hit.id || hit.objectID}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-warning">الجرح والتعديل</span>`;
         }
 
@@ -669,7 +665,7 @@
       if (!url) return '';
       try {
         const parsed = new URL(url, window.location.origin);
-        if (parsed.hostname.includes('fatawa-seo-eanp.vercel.app')) {
+        if (parsed.hostname.includes('your-site.com')) {
           return parsed.pathname + parsed.search + parsed.hash;
         }
         return url;
@@ -746,7 +742,7 @@
         const excerpt = stripPlaceholderDomain(truncateText(hit.trj || '', 150));
         const meta = hit.death ? `توفي سنة ${hit.death}` : '';
         const item = document.createElement('a');
-        item.href = `/scholar_${docId}`;
+        item.href = `details_scholars.html?id=${docId}`;
         item.className = 'curated-item';
         item.innerHTML = `
           <p class="curated-item-title">${name}</p>

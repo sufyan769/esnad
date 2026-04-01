@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>https://fatawa-seo-eanp.vercel.app/sitemap_main.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://fatawa-seo-eanp.vercel.app/sitemap_1.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://fatawa-seo-eanp.vercel.app/sitemap_2.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://fatawa-seo-eanp.vercel.app/sitemap_3.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://fatawa-seo-eanp.vercel.app/sitemap_4.xml</loc>
-  </sitemap>
-</sitemapindex>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://fatawa-seo-eanp.vercel.app/</loc>
+    <lastmod>2026-03-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://fatawa-seo-eanp.vercel.app/fatwa</loc>
+    <lastmod>2026-03-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>

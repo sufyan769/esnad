@@ -21,7 +21,7 @@
         <i data-lucide="library"></i>
         <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">البيان</span></span>
       </a>
-            <div class="nav-links">
+      <div class="nav-links">
         <a href="index.html?tab=hadith" class="nav-link">
           <i data-lucide="book-open-check" class="w-4 h-4"></i>
           الحديث الشريف
@@ -30,19 +30,15 @@
           <i data-lucide="users" class="w-4 h-4"></i>
           تراجم العلماء
         </a>
-        <a href="index.html?tab=history" class="nav-link">
+        <a href="history.html" class="nav-link">
           <i data-lucide="scroll" class="w-4 h-4"></i>
           سير الأعلام
         </a>
-        <a href="index.html?tab=jarh" class="nav-link">
-          <i data-lucide="scale" class="w-4 h-4"></i>
-          الجرح والتعديل
-        </a>
-        <a href="index.html?tab=fatawa" class="nav-link active">
+        <a href="algolia-search.html" class="nav-link active">
           <i data-lucide="book" class="w-4 h-4"></i>
           موسوعة الفتاوى
         </a>
-        <a href="index.html?tab=firebase" class="nav-link">
+        <a href="firebase-search.html" class="nav-link">
           <i data-lucide="database" class="w-4 h-4"></i>
           بحث Firebase
         </a>
@@ -52,7 +48,7 @@
 
   <section class="reader-toolbar">
     <div class="container-fluid">
-      <button onclick="window.location.href='algolia-search.html'" class="reader-return">
+      <button id="topBackBtn" class="reader-return">
         <i data-lucide="arrow-right" class="w-4 h-4"></i>
         <span>العودة إلى نتائج الفتاوى</span>
       </button>
@@ -93,7 +89,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
+    <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
   </footer>
 
   <div class="fab-container reader-fabs print:hidden">
@@ -111,7 +107,62 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { updateSEO } from './seo_optimizer.js';
+    
+    function updateSEO(title, description, url, type = 'WebPage') {
+        if (!title || !description) return;
+        const safeTitle = title.replace(/(<([^>]+)>)/gi, "").substring(0, 60);
+        const safeDesc = description.replace(/(<([^>]+)>)/gi, "").substring(0, 160);
+        
+        document.title = safeTitle + ' | موسوعة البيان';
+        
+        let metaDesc = document.querySelector('meta[name="description"]');
+        if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.name = 'description';
+            document.head.appendChild(metaDesc);
+        }
+        metaDesc.content = safeDesc;
+
+        let canonical = document.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.rel = 'canonical';
+            document.head.appendChild(canonical);
+        }
+        canonical.href = url || window.location.href;
+
+        const metas = {
+            'og:title': safeTitle,
+            'og:description': safeDesc,
+            'og:type': type,
+            'twitter:title': safeTitle,
+            'twitter:description': safeDesc
+        };
+
+        for (const [key, val] of Object.entries(metas)) {
+            let meta = document.querySelector(`meta[property="${key}"], meta[name="${key}"]`);
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.setAttribute(key.includes(':') ? (key.startsWith('og:') ? 'property' : 'name') : 'name', key);
+                document.head.appendChild(meta);
+            }
+            meta.content = val;
+        }
+
+        let script = document.querySelector('script[type="application/ld+json"]');
+        if (!script) {
+            script = document.createElement('script');
+            script.type = 'application/ld+json';
+            document.head.appendChild(script);
+        }
+        script.text = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": type,
+            "headline": safeTitle,
+            "description": safeDesc,
+            "url": url || window.location.href
+        });
+    }
 
     const firebaseConfig = {
       apiKey: "AIzaSyC9kI6aUcgHokt7e20TOL1IQpA9M7r15pc",
@@ -126,13 +177,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const PLACEHOLDER_DOMAIN = 'https://fatawa-seo-eanp.vercel.app';
-    const FATWA_PAGE = '/fatwa_';
+    const PLACEHOLDER_DOMAIN = 'https://your-site.com';
+    const FATWA_PAGE = 'fatwa.html';
 
     const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
     const hasHTMLMarkup = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
 
-    const buildFatwaDetailUrl = (id) => id ? `${FATWA_PAGE}${encodeURIComponent(id)}` : '#';
+    const buildFatwaDetailUrl = (id) => id ? `${FATWA_PAGE}?id=${encodeURIComponent(id)}` : '#';
 
     const rewriteFatwaHref = (href = '') => {
       if (!href) return href;
@@ -182,13 +233,10 @@
     const increaseFontBtn = document.getElementById('increaseFont');
     const decreaseFontBtn = document.getElementById('decreaseFont');
     const backToResultsBtn = document.getElementById('backToResults');
+    const topBackBtn = document.getElementById('topBackBtn');
 
     const params = new URLSearchParams(window.location.search);
-    let requestedId = params.get('id');
-    if (!requestedId) {
-      const match = window.location.pathname.match(/\/fatwa_([^\/]+)/i);
-      if (match && match[1]) requestedId = decodeURIComponent(match[1]);
-    }
+    const requestedId = params.get('id');
     const searchTerm = params.get('q') || '';
     let currentFontSize = 24;
 
@@ -215,13 +263,16 @@
       }
     });
 
-    backToResultsBtn.addEventListener('click', () => {
-      if (document.referrer && document.referrer.includes('algolia-search')) {
+    const handleBack = () => {
+      if (document.referrer && (document.referrer.includes('algolia-search') || document.referrer.includes('firebase-search') || document.referrer.includes('index.html'))) {
         history.back();
       } else {
         window.location.href = 'index.html?tab=fatawa';
       }
-    });
+    };
+
+    backToResultsBtn.addEventListener('click', handleBack);
+    if (topBackBtn) topBackBtn.addEventListener('click', handleBack);
 
     function updateFontSize() {
       fatwaAnswer.style.fontSize = `${currentFontSize}px`;
@@ -250,15 +301,16 @@
       fatwaQuestion.innerHTML = questionHTML;
       fatwaAnswer.innerHTML = renderRichText(data.answer, { wrapParagraphs: true, fallback: '<p>لا يوجد نص للجواب.</p>' });
       metaBar.innerHTML = buildMeta(data);
-      
-      updateSEO(data.question || 'فتوى رقم ' + data.id, data.answer || 'محتوى الفتوى', window.location.href, 'Article');
-
       viewContainer.classList.remove('hidden');
       loadingSpinner.classList.add('hidden');
       errorState.classList.add('hidden');
 
       updateFontSize();
       lucide.createIcons();
+      
+      const safeTitle = data.question ? data.question.replace(/(<([^>]+)>)/gi, "") : 'بدون عنوان';
+      const safeDesc = data.answer ? data.answer.replace(/(<([^>]+)>)/gi, "") : '';
+      updateSEO(safeTitle, safeDesc, buildFatwaDetailUrl(data.id), 'Article');
 
       copyBtn.onclick = () => {
         const plainAnswer = fatwaAnswer.innerText;
@@ -289,6 +341,96 @@
           highlightTerms(fatwaAnswer, searchTerm);
         }, 100);
       }
+      
+      enhanceRelatedFatwaLinks();
+    }
+
+    async function enhanceRelatedFatwaLinks() {
+      const links = Array.from(fatwaAnswer.querySelectorAll('a'));
+      const relatedLinks = links.filter(link => {
+        const href = link.getAttribute('href');
+        return href && href.includes('fatwa.html?id=');
+      });
+
+      if (relatedLinks.length === 0) return;
+
+      const relatedContainer = document.createElement('div');
+      relatedContainer.style.marginTop = '40px';
+      relatedContainer.style.paddingTop = '20px';
+      relatedContainer.style.borderTop = '1px solid #e2e8f0';
+      relatedContainer.innerHTML = '<h3 style="color:#0f172a; font-size:1.1em; margin-bottom:16px; font-weight:bold;">فتاوى ذات صلة:</h3>';
+      
+      const addedIds = new Set();
+
+      for (const link of relatedLinks) {
+        const href = link.getAttribute('href');
+        const urlParams = new URLSearchParams(href.split('?')[1]);
+        const relatedId = urlParams.get('id');
+        
+        if (relatedId) {
+          link.style.display = 'inline';
+          link.style.padding = '0';
+          link.style.margin = '0';
+          link.style.background = 'transparent';
+          link.style.border = 'none';
+          link.style.color = '#0284c7';
+          link.style.textDecoration = 'underline';
+          link.style.fontWeight = 'normal';
+          link.innerHTML = `[رقم ${relatedId}]`;
+          
+          if (addedIds.has(relatedId)) continue;
+          addedIds.add(relatedId);
+
+          const cardLink = document.createElement('a');
+          cardLink.href = href;
+          cardLink.style.display = 'block';
+          cardLink.style.padding = '12px 16px';
+          cardLink.style.margin = '8px 0';
+          cardLink.style.background = '#f8fafc';
+          cardLink.style.border = '1px solid #e2e8f0';
+          cardLink.style.borderRadius = '8px';
+          cardLink.style.textDecoration = 'none';
+          cardLink.style.color = '#0369a1';
+          cardLink.style.fontSize = '0.95em';
+          cardLink.style.lineHeight = '1.6';
+          cardLink.innerHTML = `<span style="color:#64748b; font-size:0.85em; display:flex; align-items:center; gap:4px; margin-bottom:4px;">
+              <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> جاري إحضار الفتوى ذات الصلة...
+            </span>`;
+          
+          relatedContainer.appendChild(cardLink);
+
+          (async () => {
+              try {
+                const relatedRef = doc(db, 'alfatawa', String(relatedId));
+                const relatedSnap = await getDoc(relatedRef);
+                if (relatedSnap.exists()) {
+                  const relatedData = relatedSnap.data();
+                  if (relatedData.question) {
+                    const safeQ = relatedData.question.replace(/(<([^>]+)>)/gi, "").trim();
+                    const singleLine = safeQ.split('\n')[0].substring(0, 100) + (safeQ.length > 100 ? '...' : '');
+                    cardLink.innerHTML = `
+                      <span style="color:#64748b; font-size:0.85em; display:flex; align-items:center; gap:6px; margin-bottom:4px; font-weight:normal;">
+                        <i data-lucide="link" class="w-4 h-4"></i> فتوى ذات صلة
+                      </span>
+                      <strong style="color: #0c4a6e;">${singleLine}</strong>
+                    `;
+                  } else {
+                    cardLink.innerHTML = `<strong>فتوى رقم ${relatedId}</strong>`;
+                  }
+                } else {
+                  cardLink.innerHTML = `<span style="color:#ef4444;">فتوى محذوفة أو غير متوفرة (رقم ${relatedId})</span>`;
+                }
+                lucide.createIcons();
+              } catch(e) {
+                  console.error(e);
+                  cardLink.innerHTML = `<strong>فتوى رقم ${relatedId}</strong>`;
+              }
+          })();
+        }
+      }
+      
+      fatwaAnswer.appendChild(relatedContainer);
+      lucide.createIcons();
     }
 
     function highlightTerms(element, term) {
@@ -337,9 +479,10 @@
 
     function buildMeta(data) {
       const parts = [];
-      const cleanId = String(data.id || '').replace('fatwa/', '');
-      if (data.id) parts.push(`<span class="reader-meta-pill">رقم الفتوى: ${cleanId}</span>`);
-      if (data.source) parts.push(`<span class="reader-meta-pill" style="background:rgba(16,185,129,0.12);color:#047857;">${data.source}</span>`);
+      if (data.id) parts.push(`<span class="reader-meta-pill">فتوى رقم ${data.id}</span>`);
+      if (data.source && !data.source.includes('fatwa_') && !data.source.includes('.html')) {
+        parts.push(`<span class="reader-meta-pill" style="background:rgba(16,185,129,0.12);color:#047857;">${data.source}</span>`);
+      }
       return parts.join('');
     }
 

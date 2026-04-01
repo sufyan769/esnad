@@ -159,32 +159,32 @@
                 <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
                         class="brand-accent">البيان</span></span>
             </a>
-                  <div class="nav-links">
-        <a href="index.html?tab=hadith" class="nav-link">
-          <i data-lucide="book-open-check" class="w-4 h-4"></i>
-          الحديث الشريف
-        </a>
-        <a href="index.html?tab=scholars" class="nav-link">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          تراجم العلماء
-        </a>
-        <a href="index.html?tab=history" class="nav-link">
-          <i data-lucide="scroll" class="w-4 h-4"></i>
-          سير الأعلام
-        </a>
-        <a href="index.html?tab=jarh" class="nav-link active">
-          <i data-lucide="scale" class="w-4 h-4"></i>
-          الجرح والتعديل
-        </a>
-        <a href="index.html?tab=fatawa" class="nav-link">
-          <i data-lucide="book" class="w-4 h-4"></i>
-          موسوعة الفتاوى
-        </a>
-        <a href="index.html?tab=firebase" class="nav-link">
-          <i data-lucide="database" class="w-4 h-4"></i>
-          بحث Firebase
-        </a>
-      </div>
+            <div class="nav-links">
+                <a href="index.html?tab=hadith" class="nav-link">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    الحديث الشريف
+                </a>
+                <a href="index.html?tab=scholars" class="nav-link">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    تراجم العلماء
+                </a>
+                <a href="history.html" class="nav-link">
+                    <i data-lucide="scroll" class="w-4 h-4"></i>
+                    سير الأعلام
+                </a>
+                <a href="index.html?tab=jarh" class="nav-link active">
+                    <i data-lucide="scale" class="w-4 h-4"></i>
+                    الجرح والتعديل
+                </a>
+                <a href="algolia-search.html" class="nav-link">
+                    <i data-lucide="book" class="w-4 h-4"></i>
+                    موسوعة الفتاوى
+                </a>
+                <a href="firebase-search.html" class="nav-link">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    بحث Firebase
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -229,7 +229,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { updateSEO } from './seo_optimizer.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyBjkJ45NsQgz1c7V1mUsnrORMYx8WceDdQ",
@@ -245,11 +244,7 @@
         const COLLECTION_NAME = 'scholars';
 
         const params = new URLSearchParams(window.location.search);
-        let docId = params.get("id");
-        if (!docId) {
-            const match = window.location.pathname.match(/\/jarh_([^\/]+)/i);
-            if (match && match[1]) docId = decodeURIComponent(match[1]);
-        }
+        const docId = params.get("id");
 
         const loadingSpinner = document.getElementById('loadingSpinner');
         const viewContainer = document.getElementById('viewContainer');
@@ -386,9 +381,6 @@
                 relSection.innerHTML = `<h4 class="font-bold mb-2">علاقات الراوي</h4><p class="text-gray-700">${data['علاقات الراوي']}</p>`;
                 viewContent.appendChild(relSection);
             }
-
-            const snippet = data['الجرح والتعديل'] && Array.isArray(data['الجرح والتعديل']) ? data['الجرح والتعديل'].join(' ') : 'أقوال الجرح والتعديل';
-            updateSEO(data['الاسم'] || 'الراوي', snippet, window.location.href, 'ProfilePage');
 
             lucide.createIcons();
         }
