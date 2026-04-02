@@ -67,7 +67,7 @@ function extractTopics(text) {
   const freq = {};
   
   words.forEach(w => {
-    if (w.length > 3 && !STOP_WORDS.has(w)) {
+    if (w.length >= 5 && !STOP_WORDS.has(w)) {
       freq[w] = (freq[w] || 0) + 1;
     }
   });
@@ -267,7 +267,7 @@ export default async function FatwaPage({ params }) {
       </div>
       
       <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-auto" style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 0', textAlign: 'center' }}>
-        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
+        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.0)</p>
       </footer>
     </div>
   );

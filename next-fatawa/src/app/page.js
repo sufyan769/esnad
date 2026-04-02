@@ -401,7 +401,9 @@ export default function SearchApp() {
               <div className="curated-list space-y-4">
                 {!featuredFatwas ? <p className="text-slate-500">جاري تحميل الفتاوى...</p> : featuredFatwas.map(hit => (
                   <Link key={hit.objectID} href={`/fatwa/${hit.objectID}`} className="block group p-3 hover:bg-white rounded transition">
-                    <p className="font-bold text-slate-800 group-hover:text-blue-700 leading-tight mb-2">{stripPlaceholderDomain(hit.question)}</p>
+                    <p className="font-bold text-slate-800 group-hover:text-blue-700 leading-tight mb-2">
+                      {truncateText(stripPlaceholderDomain(hit.question), 60)}
+                    </p>
                     <p className="text-xs text-slate-500">{hit.source?.replace('.html', '')}</p>
                   </Link>
                 ))}
@@ -427,7 +429,7 @@ export default function SearchApp() {
       </main>
 
       <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-12">
-        <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
+        <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.0)</p>
       </footer>
     </div>
   );
