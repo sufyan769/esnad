@@ -139,7 +139,7 @@ export default async function FatwaPage({ params }) {
 
   return (
     <div className="reader-body">
-      <nav className="main-nav">
+      <nav className="main-nav hidden md:block">
         <div className="nav-container">
           <Link href="/" className="nav-logo">
             <span className="brand-mark">

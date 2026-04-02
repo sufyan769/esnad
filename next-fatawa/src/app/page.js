@@ -322,7 +322,7 @@ export default function SearchApp() {
 
   return (
     <div className="min-h-screen font-sans flex flex-col">
-      <nav className="main-nav">
+      <nav className="main-nav hidden md:block">
         <div className="nav-container">
           <Link href="/" className="nav-logo">
             <span className="brand-mark">

@@ -70,7 +70,7 @@ export default async function ScholarPage({ params }) {
 
   return (
     <div className="reader-body" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <nav className="main-nav">
+      <nav className="main-nav hidden md:block">
         <div className="nav-container">
           <Link href="/" className="nav-logo">
             <span className="brand-mark"><span className="brand-slate">موسوعة</span> <span className="brand-accent">البيان</span></span>
