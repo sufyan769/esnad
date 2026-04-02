@@ -1233,8 +1233,7 @@ mark,
     }
 
     .main-nav {
-        padding: 12px 0;
-        position: static;
+        display: none !important;
     }
 
     .nav-container {
