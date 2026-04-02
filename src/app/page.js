@@ -297,7 +297,7 @@ export default function SearchApp() {
         title = hit.name || "بدون عنوان";
         const content = hit.full_intro || hit.text || "";
         snippet = content.substring(0, SNIPPET_LENGTH) + "...";
-        link = `/history.html?id=${hit.objectID}`;
+        link = `/history/${hit.objectID}`;
         metaHtml = `<span class="badge badge-warning">سير الأعلام</span>`;
       } else if (type === 'fatawa') {
         title = stripPlaceholderDomain(hit.question || "فتوى");
@@ -429,7 +429,7 @@ export default function SearchApp() {
       </main>
 
       <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-12">
-        <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.0)</p>
+        <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.1)</p>
       </footer>
     </div>
   );
