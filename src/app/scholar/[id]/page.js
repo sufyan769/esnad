@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -73,9 +74,7 @@ export default async function ScholarPage({ params }) {
 
       <section className="reader-toolbar">
         <div className="nav-container">
-          <Link href="/?tab=scholars" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#00538b', textDecoration: 'none', fontWeight: 'bold' }}>
-            <span>&rarr; العودة لنتائج البحث</span>
-          </Link>
+          <BackButton title="العودة لنتائج البحث" fallbackHref="/?tab=scholars" />
         </div>
       </section>
 
@@ -94,7 +93,7 @@ export default async function ScholarPage({ params }) {
       </div>
       
       <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-auto" style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 0', textAlign: 'center' }}>
-        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.3)</p>
+        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.4)</p>
       </footer>
     </div>
   );

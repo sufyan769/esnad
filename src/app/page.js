@@ -429,7 +429,7 @@ export default function SearchApp() {
       </main>
 
       <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-12">
-        <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.3)</p>
+        <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.4)</p>
       </footer>
     </div>
   );

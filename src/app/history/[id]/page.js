@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 
 // Algolia Configuration (matches legacy history.html)
 const APP_ID = '88G4AVERCC';
@@ -36,33 +37,23 @@ async function fetchAllChunks(initialHit) {
     baseId = initialHit.objectID.split('_')[0];
   }
   
-  if (!baseId) return [initialHit];
-
-  // Search for all hits with this base ID
-  const searchUrl = `https://${APP_ID}-dsn.algolia.net/1/indexes/${INDEX_NAME}/query`;
-  const searchRes = await fetch(searchUrl, {
-    method: 'POST',
-    headers: {
-      'X-Algolia-Application-Id': APP_ID,
-      'X-Algolia-API-Key': API_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      params: `filters=id:${baseId} OR character_id:${baseId} OR characterId:${baseId}&hitsPerPage=100`
-    }),
-    next: { revalidate: 3600 }
-  });
-
-  if (!searchRes.ok) return [initialHit];
-  const data = await searchRes.json();
-  const hits = data.hits || [];
+  // Algolia filters fail here because 'id' isn't configured as attributesForFaceting.
+  // Legacy code used a sequential ID fallback. We will use a fast parallel fallback up to 50 chunks.
+  const maxChunks = 50;
+  const chunkPromises = [];
+  for (let i = 1; i <= maxChunks; i++) {
+    chunkPromises.push(fetchAlgoliaObject(`${baseId}_${i}`));
+  }
+  
+  const chunkResults = await Promise.all(chunkPromises);
+  const hits = chunkResults.filter(h => h !== null);
   
   if (hits.length === 0) return [initialHit];
 
-  // Sort by chunk number
+  // Sort by chunk number just in case
   return hits.sort((a, b) => {
-    const chunkA = parseInt(a.chunk || (typeof a.objectID === 'string' ? a.objectID.split('_')[1] : 0));
-    const chunkB = parseInt(b.chunk || (typeof b.objectID === 'string' ? b.objectID.split('_')[1] : 0));
+    const chunkA = parseInt(a.chunk || (typeof a.objectID === 'string' ? a.objectID.split('_')[1] : 0)) || 1;
+    const chunkB = parseInt(b.chunk || (typeof b.objectID === 'string' ? b.objectID.split('_')[1] : 0)) || 1;
     return chunkA - chunkB;
   });
 }
@@ -113,9 +104,7 @@ export default async function HistoryPage({ params }) {
 
       <section className="reader-toolbar" style={{ borderBottom: '1px solid #e8e4d9' }}>
         <div className="nav-container">
-          <Link href="/?tab=history" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#854d0e', textDecoration: 'none', fontWeight: 'bold' }}>
-            <span>&rarr; العودة لنتائج البحث</span>
-          </Link>
+          <BackButton title="العودة لنتائج البحث" fallbackHref="/?tab=history" />
         </div>
       </section>
 
@@ -139,7 +128,7 @@ export default async function HistoryPage({ params }) {
       </div>
 
       <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-auto" style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 0', textAlign: 'center' }}>
-        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.3)</p>
+        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.4)</p>
       </footer>
     </div>
   );
