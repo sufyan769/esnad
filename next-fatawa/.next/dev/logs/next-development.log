@@ -1,0 +1,11 @@
+{"timestamp":"00:41:25.726","source":"Server","level":"LOG","message":"○ Compiling /_error ..."}
+{"timestamp":"00:41:31.364","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, open '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/.next/dev/static/development/_buildManifest.js.tmp.xcfxa2vwq88'"}
+{"timestamp":"00:41:31.512","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
+{"timestamp":"00:41:33.246","source":"Server","level":"ERROR","message":"Error: Cannot find module './route-modules/pages/builtin/_error'\nRequire stack:\n- /Users/xmax/Desktop/fatawa-seo-main/next-fatawa/node_modules/next/dist/server/load-default-error-components.js\n- /Users/xmax/Desktop/fatawa-seo-main/next-fatawa/node_modules/next/dist/server/dev/next-dev-server.js\n- /Users/xmax/Desktop/fatawa-seo-main/next-fatawa/node_modules/next/dist/server/next.js\n- /Users/xmax/Desktop/fatawa-seo-main/next-fatawa/node_modules/next/dist/server/lib/start-server.js"}
+{"timestamp":"00:41:33.289","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
+{"timestamp":"00:41:33.745","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
+{"timestamp":"00:41:33.748","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
+{"timestamp":"00:41:34.052","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
+{"timestamp":"00:41:34.144","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
+{"timestamp":"00:41:34.431","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
+{"timestamp":"00:41:34.565","source":"Server","level":"ERROR","message":"Error: ENOENT: no such file or directory, scandir '/Users/xmax/Desktop/fatawa-seo-main/next-fatawa/src/app'"}
