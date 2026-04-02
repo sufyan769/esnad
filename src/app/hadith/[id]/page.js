@@ -159,23 +159,6 @@ export default async function HadithPage({ params }) {
 
   return (
     <div className="reader-body">
-      <nav className="main-nav hidden md:block">
-        <div className="nav-container">
-          <Link href="/" className="nav-logo">
-            <span className="brand-mark">
-              <span className="brand-slate">موسوعة</span> <span className="brand-accent">البيان</span>
-            </span>
-          </Link>
-          <div className="nav-links">
-            <Link href="/" className="nav-link">الرئيسية</Link>
-            <Link href="/?tab=hadith" className="nav-link active">الحديث الشريف</Link>
-            <Link href="/?tab=scholars" className="nav-link">تراجم العلماء</Link>
-            <Link href="/?tab=history" className="nav-link">سير الأعلام</Link>
-            <Link href="/?tab=jarh" className="nav-link">الجرح والتعديل</Link>
-            <Link href="/?tab=fatawa" className="nav-link">الفتاوى</Link>
-          </div>
-        </div>
-      </nav>
 
       <section className="reader-toolbar">
         <div className="nav-container">
@@ -317,7 +300,7 @@ export default async function HadithPage({ params }) {
       </div>
       
       <footer className="site-footer bg-slate-800 text-slate-300 py-6 text-center mt-auto" style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 0', textAlign: 'center' }}>
-        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.2)</p>
+        <p style={{ margin: 0 }}>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة. (الإصدار 1.3.3)</p>
       </footer>
     </div>
   );

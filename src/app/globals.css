@@ -743,7 +743,7 @@ mark,
     background: #fdfaf3;
     border-bottom: 1px solid var(--border-color);
     position: sticky;
-    top: var(--nav-height);
+    top: 0;
     z-index: 900;
 }
 
