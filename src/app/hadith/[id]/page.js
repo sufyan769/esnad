@@ -82,13 +82,15 @@ export async function generateMetadata({ params }) {
   const data = await fetchHadith(id);
   
   if (data) {
-    const text = data.text || 'نص الحديث غير متوفر';
+    const text = data.text || data.osoul || 'نص الحديث غير متوفر';
+    const categories = Array.isArray(data.categories) ? data.categories.join(', ') : '';
     const safeTitle = text.replace(/(<([^>]+)>)/gi, "").substring(0, 60) + ' | موسوعة الحديث';
-    const safeDesc = text.replace(/(<([^>]+)>)/gi, "").substring(0, 160);
+    const safeDesc = (categories ? `[${categories}] - ` : '') + text.replace(/(<([^>]+)>)/gi, "").substring(0, 160);
     
     return {
       title: safeTitle,
       description: safeDesc,
+      keywords: categories,
       openGraph: {
         title: safeTitle,
         description: safeDesc,
@@ -137,10 +139,12 @@ export default async function HadithPage({ params }) {
   const sharh = data.sharh || '';
   const osoul = data.osoul || '';
   const takhrij = data.takhrij || '';
+  const categories = Array.isArray(data.categories) ? data.categories : [];
   
   // Topics & Algolia Queries
-  const topics = extractTopics(text);
-  const semanticQuery = topics.join(" ");
+  const extractedTopics = extractTopics(text);
+  const topics = categories.length > 0 ? categories : extractedTopics;
+  const semanticQuery = (categories.length > 0 ? categories : extractedTopics).join(" ");
   
   let similarHadiths = [];
   let relatedFatawa = [];
