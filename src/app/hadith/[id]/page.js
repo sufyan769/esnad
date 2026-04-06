@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
 import algoliasearch from "algoliasearch";
 import { SearchIcon, BookOpen, ScrollText } from 'lucide-react';
 import BackButton from '@/components/BackButton';
@@ -26,8 +26,49 @@ const fatawaIndex = fatawaAlgoliaClient.initIndex('alfatawa');
 
 async function fetchHadith(id) {
   try {
+    // 1. Try fetching directly by Document ID (Firebase ID)
     const snap = await getDoc(doc(db, 'hadiths', id));
     if (snap.exists()) return snap.data();
+
+    // 2. Fallback: Search by "id" field (for sitemaps/legacy URLs that use numeric/string IDs)
+    const q = query(collection(db, 'hadiths'), where("id", "==", id), limit(1));
+    const querySnap = await getDocs(q);
+    
+    if (!querySnap.empty) {
+      const data = querySnap.docs[0].data();
+      // Ensure we have an objectID for downstream uses
+      if (!data.objectID) data.objectID = querySnap.docs[0].id;
+      return data;
+    }
+
+    // 3. Fallback: If "id" is numeric but passed as string, or vice versa
+    if (!isNaN(id)) {
+        const qNum = query(collection(db, 'hadiths'), where("id", "==", Number(id)), limit(1));
+        const querySnapNum = await getDocs(qNum);
+        if (!querySnapNum.empty) {
+            const data = querySnapNum.docs[0].data();
+            if (!data.objectID) data.objectID = querySnapNum.docs[0].id;
+            return data;
+        }
+    }
+
+    // 4. Fallback for Arabic slugs (e.g., "Sahih_Bukhari_1" --> 1)
+    if (id.includes('_')) {
+        const parts = id.split('_');
+        const numericId = parts[parts.length - 1]; // Take the last part (usually the ID)
+        if (numericId && !isNaN(numericId)) {
+            const qSlug = query(collection(db, 'hadiths'), 
+                        where("id", "in", [numericId, Number(numericId)]), 
+                        limit(1));
+            const querySnapSlug = await getDocs(qSlug);
+            if (!querySnapSlug.empty) {
+                const data = querySnapSlug.docs[0].data();
+                if (!data.objectID) data.objectID = querySnapSlug.docs[0].id;
+                return data;
+            }
+        }
+    }
+
     return null;
   } catch (error) {
     console.error("Firebase fetch error:", error);

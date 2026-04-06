@@ -25,8 +25,31 @@ const hadithIndex = hadithAlgoliaClient.initIndex('firebase-hadeth');
 
 async function fetchFatwa(id) {
   try {
+    // 1. Try Document ID
     const snap = await getDoc(doc(db, 'alfatawa', id));
     if (snap.exists()) return snap.data();
+
+    // 2. Fallback: Query by field ID
+    const { collection, query, where, limit, getDocs } = await import("firebase/firestore");
+    const q = query(collection(db, 'alfatawa'), where("id", "==", id), limit(1));
+    const querySnap = await getDocs(q);
+    if (!querySnap.empty) {
+      const data = querySnap.docs[0].data();
+      if (!data.objectID) data.objectID = querySnap.docs[0].id;
+      return data;
+    }
+
+    // 3. Fallback: Numeric ID
+    if (!isNaN(id)) {
+      const qNum = query(collection(db, 'alfatawa'), where("id", "==", Number(id)), limit(1));
+      const querySnapNum = await getDocs(qNum);
+      if (!querySnapNum.empty) {
+        const data = querySnapNum.docs[0].data();
+        if (!data.objectID) data.objectID = querySnapNum.docs[0].id;
+        return data;
+      }
+    }
+
     return null;
   } catch (error) {
     console.error("Firebase fetch error:", error);
