@@ -2,15 +2,68 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/BackButton';
 
+async function fetchJarh(id) {
+  const docUrl = `https://firestore.googleapis.com/v1/projects/trajum-almaktaba/databases/(default)/documents/scholars/${id}`;
+  
+  try {
+    const res = await fetch(docUrl, { next: { revalidate: 3600 } });
+    if (res.ok) {
+        return await res.json();
+    } else {
+        const searchUrl = `https://firestore.googleapis.com/v1/projects/trajum-almaktaba/databases/(default)/documents:runQuery`;
+        const searchRes = await fetch(searchUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+                structuredQuery: {
+                    from: [{ collectionId: 'scholars' }],
+                    where: {
+                        fieldFilter: {
+                            field: { fieldPath: 'id' },
+                            op: 'EQUAL',
+                            value: { stringValue: id }
+                        }
+                    },
+                    limit: 1
+                }
+            })
+        });
+        const searchJson = await searchRes.json();
+        if (searchJson && searchJson[0]?.document) {
+            return searchJson[0].document;
+        } else if (!isNaN(id)) {
+            const searchResNum = await fetch(searchUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    structuredQuery: {
+                        from: [{ collectionId: 'scholars' }],
+                        where: {
+                            fieldFilter: {
+                                field: { fieldPath: 'id' },
+                                op: 'EQUAL',
+                                value: { integerValue: Number(id) }
+                            }
+                        },
+                        limit: 1
+                    }
+                })
+            });
+            const searchJsonNum = await searchResNum.json();
+            if (searchJsonNum && searchJsonNum[0]?.document) {
+                return searchJsonNum[0].document;
+            }
+        }
+    }
+  } catch(e) { console.error("fetchJarh error:", e); }
+  return null;
+}
+
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
-  const url = `https://firestore.googleapis.com/v1/projects/trajum-almaktaba/databases/(default)/documents/scholars/${id}`;
   
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
-    if (!res.ok) return { title: 'راوي غير موجود' };
-    const json = await res.json();
+    const json = await fetchJarh(id);
+    if (!json || !json.fields) return { title: 'راوي غير موجود' };
     
     if (json.fields) {
       const name = json.fields['الاسم']?.stringValue || 'راوي بدون اسم';
@@ -37,13 +90,9 @@ export async function generateMetadata({ params }) {
 export default async function JarhPage({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
-  const url = `https://firestore.googleapis.com/v1/projects/trajum-almaktaba/databases/(default)/documents/scholars/${id}`;
-  
-  const res = await fetch(url, { next: { revalidate: 3600 } });
-  if (!res.ok) notFound();
-  
-  const json = await res.json();
-  if (!json.fields) notFound();
+  const json = await fetchJarh(id);
+
+  if (!json || !json.fields) notFound();
 
   const getFieldVal = (field) => {
     if (!field) return '';

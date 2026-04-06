@@ -19,7 +19,7 @@ async function fetchAlgoliaObject(id) {
     },
     next: { revalidate: 3600 }
   });
-  
+
   if (!res.ok) return null;
   return res.json();
 }
@@ -30,13 +30,13 @@ async function fetchAlgoliaObject(id) {
  */
 async function fetchAllChunks(initialHit) {
   if (!initialHit) return [];
-  
+
   // Extract base ID
   let baseId = initialHit.character_id || initialHit.characterId || initialHit.id;
   if (!baseId && typeof initialHit.objectID === 'string') {
     baseId = initialHit.objectID.split('_')[0];
   }
-  
+
   // Algolia filters fail here because 'id' isn't configured as attributesForFaceting.
   // Legacy code used a sequential ID fallback. We will use a fast parallel fallback up to 50 chunks.
   const maxChunks = 50;
@@ -44,10 +44,10 @@ async function fetchAllChunks(initialHit) {
   for (let i = 1; i <= maxChunks; i++) {
     chunkPromises.push(fetchAlgoliaObject(`${baseId}_${i}`));
   }
-  
+
   const chunkResults = await Promise.all(chunkPromises);
   const hits = chunkResults.filter(h => h !== null);
-  
+
   if (hits.length === 0) return [initialHit];
 
   // Sort by chunk number just in case
@@ -62,12 +62,12 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
   const hit = await fetchAlgoliaObject(id);
-  
+
   if (!hit) return { title: 'سير الأعلام' };
-  
+
   const title = hit.name || hit.book_title || 'سير الأعلام';
   const description = (hit.full_intro || hit.text || '').substring(0, 160);
-  
+
   return {
     title: `${title} | سير الأعلام`,
     description,
@@ -78,12 +78,12 @@ export default async function HistoryPage({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
   const initialHit = await fetchAlgoliaObject(id);
-  
+
   if (!initialHit) notFound();
 
   const chunks = await fetchAllChunks(initialHit);
   const title = initialHit.name || initialHit.book_title || 'بدون عنوان';
-  
+
   // Format content
   const fullContent = chunks.map(c => {
     const parts = [];
