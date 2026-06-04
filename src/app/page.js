@@ -219,13 +219,18 @@ export default function SearchApp() {
 
     try {
       let tempResults = [];
+      const safeSearch = (client, query, options) => client.search(query, options).catch(e => {
+        console.warn('Algolia search skipped due to limits:', e.message);
+        return { hits: [] };
+      });
+
       if (tab === 'all') {
         const [hadithRes, historyRes, scholarsRes, fatawaRes, firebaseDocs] = await Promise.all([
-          clients.hadith.search(term, { hitsPerPage: 5 }),
-          clients.history.search(term, { hitsPerPage: 5 }),
-          clients.scholars.search(term, { hitsPerPage: 5 }),
-          clients.fatawa.search(term, { hitsPerPage: 5 }),
-          searchFirebaseDocs(term, 5)
+          safeSearch(clients.hadith, term, { hitsPerPage: 5 }),
+          safeSearch(clients.history, term, { hitsPerPage: 5 }),
+          safeSearch(clients.scholars, term, { hitsPerPage: 5 }),
+          safeSearch(clients.fatawa, term, { hitsPerPage: 5 }),
+          searchFirebaseDocs(term, 5).catch(e => [])
         ]);
 
         const hydratedHadith = await hydrateHadithResults(hadithRes.hits);
@@ -244,8 +249,11 @@ export default function SearchApp() {
         const docs = await searchJarhDocs(term, 20);
         tempResults = formatResults(docs, 'jarh', term);
       } else {
-        const res = await clients[tab].search(term, { hitsPerPage: 20 });
-        let hits = res.hits;
+        const res = await clients[tab].search(term, { hitsPerPage: 20 }).catch(e => {
+          console.warn(`Algolia ${tab} search skipped due to limits:`, e.message);
+          return { hits: [] };
+        });
+        let hits = res.hits || [];
         if (tab === 'hadith') hits = await hydrateHadithResults(hits);
         tempResults = formatResults(hits, tab, term);
       }
@@ -263,10 +271,9 @@ export default function SearchApp() {
     const randomPageFatwa = Math.floor(Math.random() * 50);
     const randomPageScholar = Math.floor(Math.random() * 50);
     try {
-      const [fatwaRes, scholarRes] = await Promise.all([
-        clients.fatawa.search('', { hitsPerPage: 5, page: randomPageFatwa, attributesToRetrieve: ['question', 'source', 'objectID', 'id'] }),
-        clients.scholars.search('', { hitsPerPage: 5, page: randomPageScholar, attributesToRetrieve: ['name', 'death', 'trj', 'objectID', 'id'] })
-      ]);
+      const fatwaRes = await clients.fatawa.search('', { hitsPerPage: 5, page: randomPageFatwa, attributesToRetrieve: ['question', 'source', 'objectID', 'id'] }).catch(() => ({ hits: [] }));
+      const scholarRes = await clients.scholars.search('', { hitsPerPage: 5, page: randomPageScholar, attributesToRetrieve: ['name', 'death', 'trj', 'objectID', 'id'] }).catch(() => ({ hits: [] }));
+      
       setFeaturedFatwas(fatwaRes.hits || []);
       setFeaturedScholars(scholarRes.hits || []);
     } catch (error) {
