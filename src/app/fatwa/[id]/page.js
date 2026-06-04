@@ -16,12 +16,7 @@ const config = {
 const app = getApps().find(a => a.name === 'fatawaApp') ? getApp('fatawaApp') : initializeApp(config, 'fatawaApp');
 const db = getFirestore(app);
 
-// Initialize Algolia Clients
-const fatawaAlgoliaClient = algoliasearch('3XD12I7386', '89e8e132a05fdb02275f64dec8d14d05');
-const fatawaIndex = fatawaAlgoliaClient.initIndex('alfatawa');
-
-const hadithAlgoliaClient = algoliasearch('88G4AVERCC', '76402a5d814264e01fb86ca687d26e30');
-const hadithIndex = hadithAlgoliaClient.initIndex('firebase-hadeth');
+// Algolia has been removed from Server-Side to save the monthly indexing quota.
 
 async function fetchFatwa(id) {
   try {
@@ -145,18 +140,21 @@ export default async function FatwaPage({ params }) {
   const semanticQuery = topics.join(" ");
   
   let similarFatawa = [];
-  let relatedHadiths = [];
+  let relatedHadiths = []; // Omitted to avoid expensive queries across Firebase projects
   
-  if (semanticQuery) {
+  if (category && category !== 'عام') {
     try {
-      const [fatawaRes, hadithRes] = await Promise.all([
-        fatawaIndex.search(semanticQuery, { hitsPerPage: 4, similarQuery: semanticQuery }),
-        hadithIndex.search(semanticQuery, { hitsPerPage: 3 })
-      ]);
-      similarFatawa = fatawaRes.hits.filter(h => h.objectID !== id); // Exclude current fatwa
-      relatedHadiths = hadithRes.hits;
+      // Find similar fatawa based on the primary category using Firebase
+      const mainCat = category.split(',')[0].trim();
+      const qFatwa = query(collection(db, 'alfatawa'), where("category", ">=", mainCat), where("category", "<=", mainCat + '\uf8ff'), limit(5));
+      const qSnap = await getDocs(qFatwa);
+      
+      similarFatawa = qSnap.docs
+        .map(d => ({ objectID: d.id, ...d.data() }))
+        .filter(h => h.objectID !== id) // Exclude current fatwa
+        .slice(0, 4); // Keep exactly 4
     } catch (e) {
-      console.error("Algolia semantic search error:", e);
+      console.error("Firebase similar search error:", e);
     }
   }
 
