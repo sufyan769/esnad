@@ -2,9 +2,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
-import algoliasearch from "algoliasearch";
-import { SearchIcon, BookOpen, ScrollText } from 'lucide-react';
+import { BookOpen, ScrollText } from 'lucide-react';
 import BackButton from '@/components/BackButton';
+import SimilarHadiths from '@/components/SimilarHadiths';
 
 export const revalidate = 3600; // Cache page for 1 hour
 
@@ -18,6 +18,8 @@ const app = getApps().find(a => a.name === 'hadithApp') ? getApp('hadithApp') : 
 const db = getFirestore(app);
 
 // Algolia has been removed from Server-Side to save the monthly indexing quota.
+// See: src/components/SimilarHadiths.js for the Client-Side version
+
 
 async function fetchHadith(id) {
   try {
@@ -141,24 +143,9 @@ export default async function HadithPage({ params }) {
   const topics = categories.length > 0 ? categories : extractedTopics;
   const semanticQuery = (categories.length > 0 ? categories : extractedTopics).join(" ");
   
-  let similarHadiths = [];
-  let relatedFatawa = []; // Omitted to avoid expensive queries across Firebase projects
-  
-  if (categories.length > 0) {
-    try {
-      // Find similar hadiths based on the primary category using Firebase directly
-      const mainCat = categories[0];
-      const qHadith = query(collection(db, 'hadiths'), where("categories", "array-contains", mainCat), limit(5));
-      const qSnap = await getDocs(qHadith);
-      
-      similarHadiths = qSnap.docs
-        .map(d => ({ objectID: d.id, ...d.data() }))
-        .filter(h => h.objectID !== id) // Exclude current hadith
-        .slice(0, 4); // Keep exactly 4
-    } catch (e) {
-      console.error("Firebase similar search error:", e);
-    }
-  }
+  let similarHadiths = []; // Handled client-side via <SimilarHadiths> to avoid Googlebot quota drain
+  let relatedFatawa = [];
+
 
   // Extract arrays or strings for metadata
   const getFieldVal = (field) => {
@@ -275,68 +262,13 @@ export default async function HadithPage({ params }) {
           </div>
         )}
         
-        {/* Semantic Features Section: Similar Hadith & Related Fatawa */}
-        {(similarHadiths.length > 0 || relatedFatawa.length > 0) && (
+        {/* Similar Hadiths - Client-Side only to avoid Googlebot Algolia quota drain */}
+        {categories.length > 0 && (
           <div style={{ borderTop: '2px dashed #cbd5e1', paddingTop: '40px', marginTop: '40px' }}>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', fontFamily: "'Amiri', serif", marginBottom: '30px', color: '#0f172a', textAlign: 'center' }}>
-              إضافات معرفية ذات صلة
+              أحاديث ذات صلة
             </h2>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
-              
-              {/* Similar Hadiths */}
-              {similarHadiths.length > 0 && (
-                <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#027d8d', fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '20px' }}>
-                    <SearchIcon size={20} /> أحاديث مشابهة
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {similarHadiths.map(hit => (
-                      <Link key={hit.objectID} href={`/hadith/${hit.objectID}`} 
-                            className="block bg-white p-4 rounded-lg border border-slate-200 transition-all hover:border-[#027d8d] hover:shadow-md"
-                            style={{ textDecoration: 'none' }}>
-                        <p style={{ color: '#334155', fontSize: '1.05rem', lineHeight: '1.6', margin: '0 0 8px 0', fontFamily: "'Amiri', serif" }}>
-                          {hit.text ? hit.text.substring(0, 100) + '...' : 'نص الحديث'}
-                        </p>
-                        <div style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', gap: '8px' }}>
-                          <span>الراوي: {Array.isArray(hit.rawi) ? hit.rawi[0] : hit.rawi}</span> • 
-                          <span style={{ color: hit.hukm && hit.hukm.includes('صحيح') ? '#16a34a' : 'inherit' }}>{Array.isArray(hit.hukm) ? hit.hukm[0] : hit.hukm}</span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Related Fatawa */}
-              {relatedFatawa.length > 0 && (
-                <div style={{ background: '#fdfaf3', padding: '24px', borderRadius: '16px', border: '1px solid #f4e6c5' }}>
-                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#92400e', fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '20px' }}>
-                    <BookOpen size={20} /> فتاوى فقهية متعلقة
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {relatedFatawa.map(hit => (
-                      <Link key={hit.objectID} href={`/fatwa/${hit.objectID}`} 
-                            className="block bg-white p-4 rounded-lg border border-[#f4e6c5] transition-all hover:border-[#92400e] hover:shadow-md"
-                            style={{ textDecoration: 'none' }}>
-                        <p style={{ color: '#0f172a', fontSize: '1.05rem', fontWeight: 'bold', lineHeight: '1.5', margin: '0 0 8px 0' }}>
-                          {hit.question ? hit.question.replace('https://your-site.com', '').substring(0, 90) + '...' : 'سؤال الفتوى'}
-                        </p>
-                        <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {hit.answer_snippet || hit.answer || 'الجواب...'}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                  <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                    <Link href={`/?tab=fatawa&q=${encodeURIComponent(semanticQuery)}`} style={{ color: '#92400e', fontSize: '0.9rem', fontWeight: 'bold', textDecoration: 'none' }}>
-                      عرض المزيد من الفتاوى &rarr;
-                    </Link>
-                  </div>
-                </div>
-              )}
-              
-            </div>
+            <SimilarHadiths categories={categories} currentId={id} />
           </div>
         )}
 
