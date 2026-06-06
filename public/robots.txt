@@ -1,5 +1,8 @@
-User-agent: *
-Allow: /
+# الموقع في مرحلة التجربة - الأرشفة موقوفة مؤقتاً
+# TESTING PHASE - Crawling temporarily disabled
 
-Sitemap: https://esnad-blue.vercel.app/sitemap_index.xml
-Sitemap: https://esnad-blue.vercel.app/sitemap.xml
+User-agent: *
+Disallow: /
+
+# سيتم تفعيل الأرشفة عند الإطلاق الرسمي
+# Sitemap: https://esnad-blue.vercel.app/sitemap_index.xml
