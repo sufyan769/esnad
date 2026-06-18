@@ -10,6 +10,11 @@ const fatawaClient = algoliasearch('3XD12I7386', '89e8e132a05fdb02275f64dec8d14d
 const fatawaIndex = fatawaClient.initIndex('alfatawa');
 
 const PLACEHOLDER_DOMAIN = 'https://your-site.com';
+const fixLinks = (str) => {
+  if (!str) return '';
+  return str.replace(/https:\/\/your-site\.com\/fatwa_pages\/fatwa_(\d+)\.html/g, '/fatwa/$1')
+            .replace(/https:\/\/your-site\.com/g, '');
+};
 
 export default function SimilarFatawa({ topics, currentId }) {
   const [similarFatawa, setSimilarFatawa] = useState([]);
@@ -40,10 +45,10 @@ export default function SimilarFatawa({ topics, currentId }) {
           <Link key={hit.objectID} href={`/fatwa/${hit.objectID}`}
             style={{ textDecoration: 'none', display: 'block', background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #f4e6c5', transition: 'border-color 0.2s' }}>
             <p style={{ color: '#0f172a', fontSize: '1.05rem', fontWeight: 'bold', lineHeight: '1.5', margin: '0 0 8px 0' }}>
-              {hit.question ? hit.question.replace(PLACEHOLDER_DOMAIN, '').substring(0, 90) + '...' : 'سؤال الفتوى'}
+              {hit.question ? fixLinks(hit.question).substring(0, 90) + '...' : 'سؤال الفتوى'}
             </p>
             <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-              {hit.answer_snippet || hit.answer || 'الجواب...'}
+              {fixLinks(hit.answer_snippet || hit.answer || 'الجواب...')}
             </p>
           </Link>
         ))}

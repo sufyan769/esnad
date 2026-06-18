@@ -44,7 +44,11 @@ const CONFIG = {
 };
 
 const PLACEHOLDER_DOMAIN = 'https://your-site.com';
-const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
+const stripPlaceholderDomain = (value = '') => {
+  if (!value) return '';
+  return value.replace(/https:\/\/your-site\.com\/fatwa_pages\/fatwa_(\d+)\.html/g, '/fatwa/$1')
+              .split(PLACEHOLDER_DOMAIN).join('');
+};
 const truncateText = (text = '', length = 220) => text.length > length ? `${text.substring(0, length)}...` : text;
 
 const PLACEHOLDERS = {

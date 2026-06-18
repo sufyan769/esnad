@@ -106,9 +106,14 @@ export default async function FatwaPage({ params }) {
   if (!data) notFound();
 
   let questionText = data.question || 'سؤال غير متاح';
-  if (questionText.includes('https://your-site.com')) {
-    questionText = questionText.replace('https://your-site.com', '').trim();
-  }
+  // Fix broken smart links in question and answer
+  const fixLinks = (str) => {
+    if (!str) return '';
+    return str.replace(/https:\/\/your-site\.com\/fatwa_pages\/fatwa_(\d+)\.html/g, '/fatwa/$1')
+              .replace(/https:\/\/your-site\.com/g, '');
+  };
+
+  questionText = fixLinks(questionText).trim();
   
   const question = questionText;
   const answer = data.answer || 'إجابة غير متاحة';
@@ -117,11 +122,14 @@ export default async function FatwaPage({ params }) {
 
   const formatText = (str) => {
     if (!str) return '';
-    const clean = str.replace(/(<([^>]+)>)/gi, "");
     
-    let processedStr = str;
-    if (str !== clean) {
-       processedStr = str
+    // First, fix the smart links
+    let processedStr = fixLinks(str);
+    
+    const clean = processedStr.replace(/(<([^>]+)>)/gi, "");
+    
+    if (processedStr !== clean) {
+       processedStr = processedStr
         .replace(/style="[^"]*"/gi, "")
         .replace(/dir="[^"]*"/gi, "")
         .replace(/width="[^"]*"/gi, "")
