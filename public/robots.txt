@@ -1,8 +1,4 @@
-# الموقع في مرحلة التجربة - الأرشفة موقوفة مؤقتاً
-# TESTING PHASE - Crawling temporarily disabled
-
 User-agent: *
-Disallow: /
+Allow: /
 
-# سيتم تفعيل الأرشفة عند الإطلاق الرسمي
-# Sitemap: https://esnad-blue.vercel.app/sitemap_index.xml
+Sitemap: https://www.esnad-hadith.com/sitemap_index.xml
