@@ -64,7 +64,7 @@ const PLACEHOLDERS = {
 let db, scholarDb, jarhDb, clients;
 
 export default function SearchApp() {
-  const [currentTab, setCurrentTab] = useState('all');
+  const [currentTab, setCurrentTab] = useState('hadith');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState([]);
@@ -96,11 +96,11 @@ export default function SearchApp() {
 
     // Load URL params
     const searchParams = new URLSearchParams(window.location.search);
-    const paramTab = searchParams.get('tab');
+    const paramTab = searchParams.get('tab') || 'hadith';
     const paramQuery = searchParams.get('q');
-    
-    if (paramTab && PLACEHOLDERS[paramTab]) setCurrentTab(paramTab);
-    
+
+    if (PLACEHOLDERS[paramTab]) setCurrentTab(paramTab);
+
     if (paramQuery) {
       setSearchTerm(paramQuery);
       handleSearchSubmit(paramQuery, paramTab || 'all');
